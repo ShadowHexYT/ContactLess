@@ -6,6 +6,7 @@ export default function NotesScreen({ notes, onChangeNotes }) {
   const [query, setQuery] = useState('');
   const [activeNoteId, setActiveNoteId] = useState(null);
   const [pendingDeleteNoteId, setPendingDeleteNoteId] = useState(null);
+  const [deleteArmedNoteId, setDeleteArmedNoteId] = useState(null);
   const notePreviewMaxLength = 31;
 
   const filteredNotes = useMemo(() => {
@@ -62,10 +63,12 @@ export default function NotesScreen({ notes, onChangeNotes }) {
 
   const requestDeleteNote = (id) => {
     setPendingDeleteNoteId(id);
+    setDeleteArmedNoteId(null);
   };
 
   const cancelDeleteNote = () => {
     setPendingDeleteNoteId(null);
+    setDeleteArmedNoteId(null);
   };
 
   const confirmDeleteNote = () => {
@@ -75,6 +78,7 @@ export default function NotesScreen({ notes, onChangeNotes }) {
 
     handleRemoveNote(pendingDeleteNoteId);
     setPendingDeleteNoteId(null);
+    setDeleteArmedNoteId(null);
   };
 
   if (pendingDeleteNote) {
@@ -156,7 +160,7 @@ export default function NotesScreen({ notes, onChangeNotes }) {
   }
 
   return (
-    <View>
+    <Pressable style={styles.screenWrap} onPress={() => setDeleteArmedNoteId(null)}>
       <Text style={styles.screenTitle}>Notes</Text>
       <Text style={styles.screenSubtitle}>
         Tap a note to open it. Content shows by default unless hidden in note settings.
@@ -176,7 +180,17 @@ export default function NotesScreen({ notes, onChangeNotes }) {
 
       <View style={styles.actionsRow}>
         <Text style={styles.cardLabel}>Personal Notes ({notes.length})</Text>
-        <Pressable style={styles.addButton} onPress={handleAddNote}>
+        <Pressable
+          style={styles.addButton}
+          onPress={(event) => {
+            event.stopPropagation();
+            if (deleteArmedNoteId !== null) {
+              setDeleteArmedNoteId(null);
+              return;
+            }
+            handleAddNote();
+          }}
+        >
           <Text style={styles.addButtonText}>+ Add Note</Text>
         </Pressable>
       </View>
@@ -186,21 +200,34 @@ export default function NotesScreen({ notes, onChangeNotes }) {
           <Pressable
             key={note.id}
             style={styles.card}
-            onPress={() => setActiveNoteId(note.id)}
+            onLongPress={() => setDeleteArmedNoteId(note.id)}
+            delayLongPress={260}
+            onPress={(event) => {
+              event.stopPropagation();
+              if (deleteArmedNoteId !== null) {
+                setDeleteArmedNoteId(null);
+                return;
+              }
+              setActiveNoteId(note.id);
+            }}
           >
             <View style={styles.noteHeader}>
               <Text style={styles.noteLabel}>
                 {note.title?.trim() ? note.title : 'Untitled'}
               </Text>
-              <Pressable
-                style={styles.removeButton}
-                onPress={(event) => {
-                  event.stopPropagation();
-                  requestDeleteNote(note.id);
-                }}
-              >
-                <Text style={styles.cardRemoveButtonText}>X</Text>
-              </Pressable>
+              {deleteArmedNoteId !== null ? (
+                <Pressable
+                  style={styles.removeButton}
+                  onPress={(event) => {
+                    event.stopPropagation();
+                    requestDeleteNote(note.id);
+                  }}
+                >
+                  <Text style={styles.cardRemoveButtonText}>X</Text>
+                </Pressable>
+              ) : (
+                <View style={styles.removeButtonPlaceholder} />
+              )}
             </View>
             {note.isHidden ? (
               <Text style={styles.hiddenPreview}>Content hidden</Text>
@@ -220,11 +247,12 @@ export default function NotesScreen({ notes, onChangeNotes }) {
       {filteredNotes.length === 0 && (
         <Text style={styles.emptyState}>You have no notes, add some!</Text>
       )}
-    </View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
+  screenWrap: {},
   screenTitle: {
     color: '#f2f7ff',
     fontSize: 22,
@@ -356,6 +384,10 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingHorizontal: 9,
     paddingVertical: 5,
+  },
+  removeButtonPlaceholder: {
+    width: 30,
+    height: 30,
   },
   detailRemoveButton: {
     paddingHorizontal: 12,
