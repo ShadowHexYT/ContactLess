@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export default function NotesScreen({ notes, onChangeNotes }) {
   const [query, setQuery] = useState('');
@@ -104,13 +105,13 @@ export default function NotesScreen({ notes, onChangeNotes }) {
       <View>
         <View style={styles.detailTopRow}>
           <Pressable style={styles.backButton} onPress={() => setActiveNoteId(null)}>
-            <Text style={styles.backButtonText}>Back</Text>
+            <Text style={styles.backButtonText}>←</Text>
           </Pressable>
           <Pressable
-            style={styles.removeButton}
+            style={[styles.removeButton, styles.detailRemoveButton]}
             onPress={() => requestDeleteNote(activeNote.id)}
           >
-            <Text style={styles.removeButtonText}>-</Text>
+            <Text style={styles.detailRemoveButtonText}>Delete</Text>
           </Pressable>
         </View>
 
@@ -133,10 +134,18 @@ export default function NotesScreen({ notes, onChangeNotes }) {
 
         <View style={styles.visibilityRow}>
           <Text style={styles.visibilityLabel}>Hide note content on notes screen</Text>
-          <Switch
-            value={Boolean(activeNote.isHidden)}
-            onValueChange={(value) => handleChangeNote(activeNote.id, 'isHidden', value)}
-          />
+          <Pressable
+            style={styles.visibilityToggle}
+            onPress={() =>
+              handleChangeNote(activeNote.id, 'isHidden', !Boolean(activeNote.isHidden))
+            }
+          >
+            <Ionicons
+              name={activeNote.isHidden ? 'eye-off-outline' : 'eye-outline'}
+              size={22}
+              color="#b8c9e2"
+            />
+          </Pressable>
         </View>
 
         <Pressable style={styles.saveButton} onPress={() => setActiveNoteId(null)}>
@@ -190,7 +199,7 @@ export default function NotesScreen({ notes, onChangeNotes }) {
                   requestDeleteNote(note.id);
                 }}
               >
-                <Text style={styles.removeButtonText}>-</Text>
+                <Text style={styles.cardRemoveButtonText}>X</Text>
               </Pressable>
             </View>
             {note.isHidden ? (
@@ -288,6 +297,13 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 10,
   },
+  visibilityToggle: {
+    borderWidth: 1,
+    borderColor: '#355072',
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+  },
   actionsRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -341,11 +357,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 9,
     paddingVertical: 5,
   },
-  removeButtonText: {
+  detailRemoveButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+  },
+  detailRemoveButtonText: {
     color: '#b8c9e2',
-    fontSize: 18,
+    fontSize: 13,
     fontWeight: '600',
-    lineHeight: 18,
+  },
+  cardRemoveButtonText: {
+    color: '#b8c9e2',
+    fontSize: 13,
+    fontWeight: '700',
   },
   notePreview: {
     color: '#d4e2f5',
