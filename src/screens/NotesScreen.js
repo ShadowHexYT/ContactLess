@@ -5,7 +5,7 @@ export default function NotesScreen({ notes, onChangeNotes }) {
   const [query, setQuery] = useState('');
   const [activeNoteId, setActiveNoteId] = useState(null);
   const [pendingDeleteNoteId, setPendingDeleteNoteId] = useState(null);
-  const notePreviewMaxLength = 45;
+  const notePreviewMaxLength = 31;
 
   const filteredNotes = useMemo(() => {
     const cleanQuery = query.trim().toLowerCase();
