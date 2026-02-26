@@ -40,7 +40,7 @@ export default function App() {
   const [displayName, setDisplayName] = useState('Your Name');
   const [email, setEmail] = useState('you@example.com');
   const [phone, setPhone] = useState('+1 000 000 0000');
-  const [notes, setNotes] = useState('Add personal notes or quick reminders here.');
+  const [notes, setNotes] = useState([]);
   const [isNfcEnabled, setIsNfcEnabled] = useState(false);
   const [accounts, setAccounts] = useState(DEFAULT_ACCOUNTS);
   const screenAnim = useRef(new Animated.Value(1)).current;
