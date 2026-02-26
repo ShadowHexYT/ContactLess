@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export default function NotesScreen({ notes, onChangeNotes }) {
   const [query, setQuery] = useState('');
@@ -81,31 +81,34 @@ export default function NotesScreen({ notes, onChangeNotes }) {
     setDeleteArmedNoteId(null);
   };
 
-  if (pendingDeleteNote) {
-    return (
-      <View>
-        <Text style={styles.screenTitle}>Delete Note</Text>
-        <Text style={styles.screenSubtitle}>
-          Are you sure you want to delete this note? It will be lost forever.
-        </Text>
-        <Text style={styles.confirmNoteName}>
-          {pendingDeleteNote.title?.trim() ? pendingDeleteNote.title : 'Untitled'}
-        </Text>
+  const confirmDeleteModal = (
+    <Modal visible={Boolean(pendingDeleteNote)} transparent animationType="fade">
+      <Pressable style={styles.modalBackdrop} onPress={cancelDeleteNote}>
+        <Pressable style={styles.modalCard} onPress={() => {}}>
+          <Text style={styles.modalTitle}>Delete Note</Text>
+          <Text style={styles.screenSubtitle}>
+            Are you sure you want to delete this note? It will be lost forever.
+          </Text>
+          <Text style={styles.confirmNoteName}>
+            {pendingDeleteNote?.title?.trim() ? pendingDeleteNote.title : 'Untitled'}
+          </Text>
 
-        <View style={styles.confirmActions}>
-          <Pressable style={styles.backButton} onPress={cancelDeleteNote}>
-            <Text style={styles.backButtonText}>Cancel</Text>
-          </Pressable>
-          <Pressable style={styles.confirmDeleteButton} onPress={confirmDeleteNote}>
-            <Text style={styles.confirmDeleteButtonText}>Delete</Text>
-          </Pressable>
-        </View>
-      </View>
-    );
-  }
+          <View style={styles.confirmActions}>
+            <Pressable style={styles.backButton} onPress={cancelDeleteNote}>
+              <Text style={styles.backButtonText}>Cancel</Text>
+            </Pressable>
+            <Pressable style={styles.confirmDeleteButton} onPress={confirmDeleteNote}>
+              <Text style={styles.confirmDeleteButtonText}>Delete</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
 
   if (activeNote) {
     return (
+      <>
       <View>
         <View style={styles.detailTopRow}>
           <Pressable style={styles.backButton} onPress={() => setActiveNoteId(null)}>
@@ -156,10 +159,13 @@ export default function NotesScreen({ notes, onChangeNotes }) {
           <Text style={styles.saveButtonText}>Save</Text>
         </Pressable>
       </View>
+      {confirmDeleteModal}
+      </>
     );
   }
 
   return (
+    <>
     <Pressable style={styles.screenWrap} onPress={() => setDeleteArmedNoteId(null)}>
       <Text style={styles.screenTitle}>Notes</Text>
       <Text style={styles.screenSubtitle}>
@@ -248,11 +254,32 @@ export default function NotesScreen({ notes, onChangeNotes }) {
         <Text style={styles.emptyState}>You have no notes, add some!</Text>
       )}
     </Pressable>
+    {confirmDeleteModal}
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   screenWrap: {},
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(8, 15, 27, 0.72)',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  modalCard: {
+    backgroundColor: '#13233a',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#355072',
+    padding: 16,
+  },
+  modalTitle: {
+    color: '#f2f7ff',
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 6,
+  },
   screenTitle: {
     color: '#f2f7ff',
     fontSize: 22,
