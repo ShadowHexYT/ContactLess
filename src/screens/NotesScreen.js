@@ -1,13 +1,27 @@
-﻿import React from 'react';
+﻿import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 export default function NotesScreen({ notes, onChangeNotes }) {
+  const [query, setQuery] = useState('');
+
   return (
     <View>
       <Text style={styles.screenTitle}>Notes</Text>
       <Text style={styles.screenSubtitle}>
         Draft notes to include with shared contact details.
       </Text>
+
+      <View style={styles.searchWrap}>
+        <TextInput
+          style={styles.searchInput}
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Search all notes"
+          placeholderTextColor="#7f93b3"
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
+      </View>
 
       <View style={styles.card}>
         <Text style={styles.cardLabel}>Personal Notes</Text>
@@ -40,6 +54,18 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 14,
     marginBottom: 12,
+  },
+  searchWrap: {
+    marginBottom: 12,
+  },
+  searchInput: {
+    backgroundColor: '#13233a',
+    color: '#f2f7ff',
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderWidth: 1,
+    borderColor: '#223b5d',
   },
   cardLabel: {
     color: '#f2f7ff',
