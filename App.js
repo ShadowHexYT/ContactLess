@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import {
   Alert,
   Animated,
@@ -560,10 +561,15 @@ export default function App() {
       <SafeAreaView style={[styles.safeArea, { backgroundColor: activeTheme.background }]}>
         <StatusBar barStyle="light-content" />
         <View style={[styles.container, { backgroundColor: activeTheme.background }]}>
-          <Text style={styles.headerTitle}>ContactLess</Text>
-          <Text style={[styles.headerSubtitle, { color: activeTheme.accent }]}>
-            NFC Contact Share Baseline
-          </Text>
+          <View style={styles.headerWrap}>
+            <View style={styles.headerRow}>
+              <Ionicons name="share-social" size={24} color={activeTheme.accent} />
+              <Text style={styles.headerTitle}>ContactLess</Text>
+            </View>
+            <Text style={[styles.headerSubtitle, { color: activeTheme.accent }]}>
+              Share what you love, with who you love!
+            </Text>
+          </View>
 
           <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
             <Animated.View
@@ -599,17 +605,26 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0d1726',
     paddingHorizontal: 16,
-    paddingTop: 8,
+    paddingTop: 2,
+  },
+  headerWrap: {
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   headerTitle: {
     color: '#f2f7ff',
     fontSize: 28,
     fontWeight: '700',
+    marginLeft: 8,
   },
   headerSubtitle: {
     color: '#b0c0d9',
     marginTop: 4,
-    marginBottom: 12,
+    textAlign: 'center',
   },
   content: {
     flex: 1,
