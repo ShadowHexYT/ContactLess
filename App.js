@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Alert,
   Animated,
   AppState,
   Easing,
@@ -47,6 +48,8 @@ const DEFAULT_PROFILE = {
   shareDescription: 'Let\'s connect on ContactLess.',
   themeId: 'ocean',
   isNfcEnabled: false,
+  isAirDropEnabled: false,
+  sharedContacts: [],
 };
 const NOTES_STORAGE_KEY = 'contactless.notes';
 const PREFS_STORAGE_KEY = 'contactless.prefs';
@@ -74,11 +77,13 @@ export default function App() {
   const [profileImageUri, setProfileImageUri] = useState(DEFAULT_PROFILE.profileImageUri);
   const [shareDescription, setShareDescription] = useState(DEFAULT_PROFILE.shareDescription);
   const [themeId, setThemeId] = useState(DEFAULT_PROFILE.themeId);
+  const [sharedContacts, setSharedContacts] = useState(DEFAULT_PROFILE.sharedContacts);
   const [notes, setNotes] = useState([]);
   const [isNotesHydrated, setIsNotesHydrated] = useState(false);
   const [isPrefsHydrated, setIsPrefsHydrated] = useState(false);
   const [isReturningUser, setIsReturningUser] = useState(false);
   const [isNfcEnabled, setIsNfcEnabled] = useState(DEFAULT_PROFILE.isNfcEnabled);
+  const [isAirDropEnabled, setIsAirDropEnabled] = useState(DEFAULT_PROFILE.isAirDropEnabled);
   const [accounts, setAccounts] = useState(DEFAULT_ACCOUNTS);
   const screenAnim = useRef(new Animated.Value(1)).current;
   const latestNotesRef = useRef(notes);
@@ -91,6 +96,8 @@ export default function App() {
     shareDescription,
     themeId,
     isNfcEnabled,
+    isAirDropEnabled,
+    sharedContacts,
   });
   const canPersistNotes = Platform.OS === 'ios';
   const canPersistPrefs = Platform.OS === 'ios';
@@ -139,8 +146,10 @@ export default function App() {
         shareDescription,
         themeId,
         isNfcEnabled,
+        isAirDropEnabled,
       },
       notes,
+      sharedContacts,
       accounts,
     };
 
@@ -160,11 +169,121 @@ export default function App() {
     setShareDescription(DEFAULT_PROFILE.shareDescription);
     setThemeId(DEFAULT_PROFILE.themeId);
     setIsNfcEnabled(DEFAULT_PROFILE.isNfcEnabled);
+    setIsAirDropEnabled(DEFAULT_PROFILE.isAirDropEnabled);
+    setSharedContacts(DEFAULT_PROFILE.sharedContacts);
     setNotes([]);
     setAccounts(DEFAULT_ACCOUNTS);
     setIsReturningUser(false);
     persistNotes([]);
     persistPrefs(DEFAULT_PROFILE);
+  };
+
+  const askForAppConsent = (title, message) =>
+    new Promise((resolve) => {
+      Alert.alert(title, message, [
+        { text: 'Not Now', style: 'cancel', onPress: () => resolve(false) },
+        { text: 'Allow', onPress: () => resolve(true) },
+      ]);
+    });
+
+  const requestNfcPermission = async (nextValue) => {
+    if (!nextValue) {
+      setIsNfcEnabled(false);
+      return;
+    }
+
+    const nfcConsent = await askForAppConsent(
+      'Allow NFC Sharing',
+      'ContactLess needs NFC access to share imported contacts by tap.'
+    );
+    if (!nfcConsent) {
+      setIsNfcEnabled(false);
+      return;
+    }
+
+    let nativeNfcAvailable = false;
+    try {
+      const nfcModule = await import('react-native-nfc-manager');
+      const NfcManager = nfcModule.default ?? nfcModule;
+      if (NfcManager?.start) {
+        await NfcManager.start();
+        nativeNfcAvailable = true;
+      }
+    } catch (error) {
+      nativeNfcAvailable = false;
+    }
+
+    if (!nativeNfcAvailable) {
+      Alert.alert(
+        'NFC Unavailable',
+        'NFC permissions are not available in this build. Install and configure NFC native module in a dev build.'
+      );
+      setIsNfcEnabled(false);
+      return;
+    }
+
+    setIsNfcEnabled(true);
+  };
+
+  const requestAirDropPermission = async (nextValue) => {
+    if (!nextValue) {
+      setIsAirDropEnabled(false);
+      return;
+    }
+
+    const airDropConsent = await askForAppConsent(
+      'Allow AirDrop/Wi-Fi Sharing',
+      'ContactLess uses the iOS share sheet for AirDrop/Wi-Fi based sharing.'
+    );
+    if (!airDropConsent) {
+      setIsAirDropEnabled(false);
+      return;
+    }
+
+    setIsAirDropEnabled(true);
+  };
+
+  const importContactsFromPhone = async () => {
+    try {
+      const Contacts = await import('expo-contacts');
+      const permission = await Contacts.requestPermissionsAsync();
+      if (permission.status !== 'granted') {
+        Alert.alert('Permission needed', 'Allow Contacts access to import phone contacts.');
+        return;
+      }
+
+      const result = await Contacts.getContactsAsync({
+        fields: [Contacts.Fields.PhoneNumbers],
+      });
+
+      const imported = (result.data ?? [])
+        .map((contact) => {
+          const firstNumber = contact.phoneNumbers?.[0]?.number?.trim();
+          if (!firstNumber) {
+            return null;
+          }
+
+          return {
+            id: contact.id,
+            name: contact.name?.trim() || 'Unnamed Contact',
+            phone: firstNumber,
+          };
+        })
+        .filter(Boolean);
+
+      setSharedContacts(imported);
+      Alert.alert(
+        'Contacts Imported',
+        imported.length > 0
+          ? `${imported.length} contact${imported.length === 1 ? '' : 's'} ready to share.`
+          : 'No contacts with phone numbers were found.'
+      );
+    } catch (error) {
+      Alert.alert(
+        'Import unavailable',
+        'Contacts import is not available yet. Install dependencies and restart the app.'
+      );
+    }
   };
 
   useEffect(() => {
@@ -191,8 +310,21 @@ export default function App() {
       shareDescription,
       themeId,
       isNfcEnabled,
+      isAirDropEnabled,
+      sharedContacts,
     };
-  }, [displayName, username, email, phone, profileImageUri, shareDescription, themeId, isNfcEnabled]);
+  }, [
+    displayName,
+    username,
+    email,
+    phone,
+    profileImageUri,
+    shareDescription,
+    themeId,
+    isNfcEnabled,
+    isAirDropEnabled,
+    sharedContacts,
+  ]);
 
   const persistNotes = (nextNotes) => {
     if (!canPersistNotes) {
@@ -286,6 +418,12 @@ export default function App() {
           if (typeof parsed.isNfcEnabled === 'boolean') {
             setIsNfcEnabled(parsed.isNfcEnabled);
           }
+          if (typeof parsed.isAirDropEnabled === 'boolean') {
+            setIsAirDropEnabled(parsed.isAirDropEnabled);
+          }
+          if (Array.isArray(parsed.sharedContacts)) {
+            setSharedContacts(parsed.sharedContacts);
+          }
         }
       }
     } catch (error) {
@@ -309,6 +447,8 @@ export default function App() {
       shareDescription,
       themeId,
       isNfcEnabled,
+      isAirDropEnabled,
+      sharedContacts,
     });
   }, [
     displayName,
@@ -319,6 +459,8 @@ export default function App() {
     shareDescription,
     themeId,
     isNfcEnabled,
+    isAirDropEnabled,
+    sharedContacts,
     isPrefsHydrated,
   ]);
 
@@ -373,8 +515,10 @@ export default function App() {
           email={email}
           phone={phone}
           isNfcEnabled={isNfcEnabled}
+          isAirDropEnabled={isAirDropEnabled}
           profileImageUri={profileImageUri}
           shareDescription={shareDescription}
+          sharedContacts={sharedContacts}
           theme={activeTheme}
         />
       );
@@ -391,7 +535,9 @@ export default function App() {
         phone={phone}
         onChangePhone={setPhone}
         isNfcEnabled={isNfcEnabled}
-        onToggleNfc={setIsNfcEnabled}
+        onToggleNfc={requestNfcPermission}
+        isAirDropEnabled={isAirDropEnabled}
+        onToggleAirDrop={requestAirDropPermission}
         profileImageUri={profileImageUri}
         onChangeProfileImageUri={setProfileImageUri}
         shareDescription={shareDescription}
@@ -402,6 +548,8 @@ export default function App() {
         theme={activeTheme}
         onExportUserData={exportUserData}
         onDeleteUserData={deleteAllUserData}
+        sharedContacts={sharedContacts}
+        onImportContacts={importContactsFromPhone}
       />
     );
   };

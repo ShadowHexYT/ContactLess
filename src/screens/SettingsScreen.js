@@ -13,6 +13,8 @@ export default function SettingsScreen({
   onChangePhone,
   isNfcEnabled,
   onToggleNfc,
+  isAirDropEnabled,
+  onToggleAirDrop,
   profileImageUri,
   onChangeProfileImageUri,
   shareDescription,
@@ -23,6 +25,8 @@ export default function SettingsScreen({
   theme,
   onExportUserData,
   onDeleteUserData,
+  sharedContacts,
+  onImportContacts,
 }) {
   const initials = displayName?.trim()?.slice(0, 1)?.toUpperCase() || '?';
   const accentColor = theme?.accent ?? '#2d76f9';
@@ -155,8 +159,32 @@ export default function SettingsScreen({
           <Switch value={isNfcEnabled} onValueChange={onToggleNfc} />
         </View>
         <Text style={[styles.cardMuted, { color: descriptionColor }]}>
-          Placeholder toggle only. NFC permissions/session setup will be added in the next phase.
+          NFC permission is requested the first time you enable it.
         </Text>
+      </View>
+
+      <View style={[styles.card, { backgroundColor: theme?.card ?? '#13233a' }]}>
+        <View style={styles.rowBetween}>
+          <Text style={styles.rowLabel}>Enable AirDrop/Wi-Fi Sharing</Text>
+          <Switch value={isAirDropEnabled} onValueChange={onToggleAirDrop} />
+        </View>
+        <Text style={[styles.cardMuted, { color: descriptionColor }]}>
+          AirDrop/Wi-Fi sharing permission is requested when enabled.
+        </Text>
+      </View>
+
+      <View style={[styles.card, { backgroundColor: theme?.card ?? '#13233a' }]}>
+        <Text style={styles.cardLabel}>Phone Contacts</Text>
+        <Text style={[styles.cardMuted, { color: descriptionColor }]}>
+          Imported: {sharedContacts.length} contact{sharedContacts.length === 1 ? '' : 's'} ready
+          for sharing.
+        </Text>
+        <Pressable
+          style={[styles.dataActionButton, styles.singleActionButton, { borderColor: accentBorder }]}
+          onPress={onImportContacts}
+        >
+          <Text style={styles.dataActionText}>Import From Phone Contacts</Text>
+        </Pressable>
       </View>
 
       <View style={[styles.card, { backgroundColor: theme?.card ?? '#13233a' }]}>
@@ -377,6 +405,10 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  singleActionButton: {
+    marginRight: 0,
+    marginTop: 6,
   },
   deleteDataButton: {
     marginRight: 0,

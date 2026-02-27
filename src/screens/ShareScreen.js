@@ -8,8 +8,10 @@ export default function ShareScreen({
   email,
   phone,
   isNfcEnabled,
+  isAirDropEnabled,
   profileImageUri,
   shareDescription,
+  sharedContacts,
   theme,
 }) {
   const initials = displayName?.trim()?.slice(0, 1)?.toUpperCase() || '?';
@@ -50,8 +52,31 @@ export default function ShareScreen({
         <Text style={[styles.cardMuted, { color: descriptionColor }]}>
           NFC: {isNfcEnabled ? 'Enabled' : 'Disabled'}
         </Text>
+        <Text style={[styles.cardMuted, { color: descriptionColor }]}>
+          AirDrop: {isAirDropEnabled ? 'Allowed' : 'Not Allowed'}
+        </Text>
         <Text style={[styles.cardMuted, { color: descriptionColor }]}>QR: Ready</Text>
         <Text style={[styles.cardMuted, { color: descriptionColor }]}>Link: Ready</Text>
+      </View>
+
+      <View style={[styles.card, { backgroundColor: theme?.card ?? '#13233a' }]}>
+        <Text style={styles.cardLabel}>Imported Contacts ({sharedContacts.length})</Text>
+        {sharedContacts.length === 0 ? (
+          <Text style={[styles.cardMuted, { color: descriptionColor }]}>
+            Import contacts in Settings to share their numbers via NFC.
+          </Text>
+        ) : (
+          sharedContacts.slice(0, 6).map((contact) => (
+            <View key={contact.id} style={styles.contactRow}>
+              <Text style={styles.previewLine}>
+                {contact.name} - {contact.phone}
+              </Text>
+              <Text style={[styles.contactBadge, { color: descriptionColor, borderColor: `${descriptionColor}66` }]}>
+                NFC Ready
+              </Text>
+            </View>
+          ))
+        )}
       </View>
     </View>
   );
@@ -122,5 +147,19 @@ const styles = StyleSheet.create({
     color: '#d8e4f8',
     marginBottom: 8,
     lineHeight: 19,
+  },
+  contactRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  contactBadge: {
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    fontSize: 11,
+    fontWeight: '700',
   },
 });
