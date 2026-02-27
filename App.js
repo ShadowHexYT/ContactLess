@@ -77,6 +77,7 @@ export default function App() {
   const [notes, setNotes] = useState([]);
   const [isNotesHydrated, setIsNotesHydrated] = useState(false);
   const [isPrefsHydrated, setIsPrefsHydrated] = useState(false);
+  const [isReturningUser, setIsReturningUser] = useState(false);
   const [isNfcEnabled, setIsNfcEnabled] = useState(DEFAULT_PROFILE.isNfcEnabled);
   const [accounts, setAccounts] = useState(DEFAULT_ACCOUNTS);
   const screenAnim = useRef(new Animated.Value(1)).current;
@@ -161,6 +162,7 @@ export default function App() {
     setIsNfcEnabled(DEFAULT_PROFILE.isNfcEnabled);
     setNotes([]);
     setAccounts(DEFAULT_ACCOUNTS);
+    setIsReturningUser(false);
     persistNotes([]);
     persistPrefs(DEFAULT_PROFILE);
   };
@@ -254,6 +256,7 @@ export default function App() {
     try {
       const saved = Settings.get(PREFS_STORAGE_KEY);
       if (typeof saved === 'string') {
+        setIsReturningUser(true);
         const parsed = JSON.parse(saved);
         if (parsed && typeof parsed === 'object') {
           if (typeof parsed.displayName === 'string') {
@@ -338,6 +341,7 @@ export default function App() {
         <HomeScreen
           displayName={displayName}
           username={username}
+          isReturningUser={isReturningUser}
           email={email}
           phone={phone}
           stats={homeStats}

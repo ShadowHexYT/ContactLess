@@ -2,8 +2,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
-export default function HomeScreen({ displayName, username, email, phone, stats, theme }) {
+export default function HomeScreen({ displayName, username, isReturningUser, email, phone, stats, theme }) {
   const descriptionColor = `${(theme?.accent ?? '#9eb1ce')}CC`;
+  const greetingName = (username?.trim() || displayName || 'User').replace(/^@+/, '');
+  const greeting = isReturningUser
+    ? `Welcome Back, ${greetingName}!`
+    : 'Welcome, New User!';
   const kpis = [
     { id: 'people', label: 'People Shared', value: `${stats.totalPeopleShared}` },
     { id: 'today', label: 'Today', value: `${stats.todayShares}` },
@@ -15,7 +19,7 @@ export default function HomeScreen({ displayName, username, email, phone, stats,
     <View>
       <View style={styles.headerRow}>
         <Ionicons name="home" size={20} color={descriptionColor} style={styles.headerIcon} />
-        <Text style={styles.screenTitle}>Home</Text>
+        <Text style={styles.screenTitle}>{greeting}</Text>
       </View>
 
       <View style={[styles.card, { backgroundColor: theme?.card ?? '#13233a' }]}>
