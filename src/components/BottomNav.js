@@ -4,7 +4,7 @@ import { Animated, Easing, StyleSheet, Text, TouchableOpacity, View } from 'reac
 
 const NAV_INSET = 8;
 
-export default function BottomNav({ activeScreen, onChange }) {
+export default function BottomNav({ activeScreen, onChange, theme }) {
   const tabs = [
     { key: 'home', label: 'Home', icon: 'home-outline', activeIcon: 'home' },
     {
@@ -70,12 +70,13 @@ export default function BottomNav({ activeScreen, onChange }) {
     borderRadius: activeCircleSize / 2,
     top: (barHeight - activeCircleSize) / 2,
     left: NAV_INSET + (tabWidth - activeCircleSize) / 2,
+    backgroundColor: theme?.accent ?? '#2d76f9',
     transform: [{ translateX: Animated.multiply(indicatorLeft, tabWidth) }],
   };
 
   return (
     <View
-      style={styles.navBar}
+      style={[styles.navBar, { backgroundColor: theme?.card ?? '#12213a' }]}
       onLayout={(event) => {
         setBarWidth(event.nativeEvent.layout.width);
         setBarHeight(event.nativeEvent.layout.height);
@@ -110,7 +111,6 @@ const styles = StyleSheet.create({
   },
   activePill: {
     position: 'absolute',
-    backgroundColor: '#2d76f9',
   },
   navButtonText: {
     color: '#c4d3eb',

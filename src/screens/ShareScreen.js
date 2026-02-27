@@ -1,7 +1,19 @@
 ﻿import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
-export default function ShareScreen({ displayName, email, phone, isNfcEnabled }) {
+export default function ShareScreen({
+  displayName,
+  username,
+  email,
+  phone,
+  isNfcEnabled,
+  profileImageUri,
+  shareDescription,
+  theme,
+}) {
+  const initials = displayName?.trim()?.slice(0, 1)?.toUpperCase() || '?';
+  const cleanUsername = username?.trim();
+
   return (
     <View>
       <Text style={styles.screenTitle}>Share</Text>
@@ -9,14 +21,29 @@ export default function ShareScreen({ displayName, email, phone, isNfcEnabled })
         Choose how you want to share your contact card right now.
       </Text>
 
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: theme?.card ?? '#13233a' }]}>
         <Text style={styles.cardLabel}>Live Card Preview</Text>
-        <Text style={styles.previewLine}>{displayName}</Text>
+        <View style={styles.previewHeader}>
+          {profileImageUri?.trim() ? (
+            <Image source={{ uri: profileImageUri.trim() }} style={styles.avatar} />
+          ) : (
+            <View style={[styles.avatar, styles.avatarFallback]}>
+              <Text style={styles.avatarFallbackText}>{initials}</Text>
+            </View>
+          )}
+          <View>
+            <Text style={styles.previewLine}>{displayName}</Text>
+            {cleanUsername ? <Text style={styles.handleLine}>{cleanUsername}</Text> : null}
+          </View>
+        </View>
+        {shareDescription?.trim() ? (
+          <Text style={styles.descriptionLine}>{shareDescription.trim()}</Text>
+        ) : null}
         <Text style={styles.previewLine}>{email}</Text>
         <Text style={styles.previewLine}>{phone}</Text>
       </View>
 
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: theme?.card ?? '#13233a' }]}>
         <Text style={styles.cardLabel}>Share Methods</Text>
         <Text style={styles.cardMuted}>NFC: {isNfcEnabled ? 'Enabled' : 'Disabled'}</Text>
         <Text style={styles.cardMuted}>QR: Ready</Text>
@@ -55,5 +82,37 @@ const styles = StyleSheet.create({
   previewLine: {
     color: '#d8e4f8',
     marginBottom: 6,
+  },
+  previewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  avatar: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    marginRight: 12,
+    backgroundColor: '#0d1726',
+  },
+  avatarFallback: {
+    borderWidth: 1,
+    borderColor: '#355072',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarFallbackText: {
+    color: '#f2f7ff',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  handleLine: {
+    color: '#9eb1ce',
+    marginBottom: 4,
+  },
+  descriptionLine: {
+    color: '#d8e4f8',
+    marginBottom: 8,
+    lineHeight: 19,
   },
 });

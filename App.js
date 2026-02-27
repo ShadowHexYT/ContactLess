@@ -38,19 +38,54 @@ const HOTFIX_LIST = [
   { id: 'h3', title: 'QR scan latency reduction', status: 'In QA' },
 ];
 const NOTES_STORAGE_KEY = 'contactless.notes';
+const PREFS_STORAGE_KEY = 'contactless.prefs';
+const THEME_PRESETS = [
+  { id: 'ocean', label: 'Ocean', background: '#0d1726', card: '#13233a', accent: '#2d76f9' },
+  { id: 'forest', label: 'Forest', background: '#0f2019', card: '#173126', accent: '#2fa36b' },
+  { id: 'sunset', label: 'Sunset', background: '#271811', card: '#3a2218', accent: '#eb7a34' },
+  { id: 'slate', label: 'Slate', background: '#1a1d24', card: '#232834', accent: '#6f8ec7' },
+  { id: 'ember', label: 'Ember', background: '#22120f', card: '#341d17', accent: '#ff6a3d' },
+  { id: 'mint', label: 'Mint', background: '#10201d', card: '#17302b', accent: '#34c49b' },
+  { id: 'ruby', label: 'Ruby', background: '#251018', card: '#3a1925', accent: '#e34f7a' },
+  { id: 'cobalt', label: 'Cobalt', background: '#101a2b', card: '#172740', accent: '#4f86ff' },
+  { id: 'gold', label: 'Gold', background: '#261f10', card: '#3b3017', accent: '#f2b84a' },
+  { id: 'ice', label: 'Ice', background: '#0f1d24', card: '#17303c', accent: '#66c6e8' },
+  { id: 'orchard', label: 'Orchard', background: '#1b2110', card: '#2b3418', accent: '#9fce4e' },
+  { id: 'rose', label: 'Rose', background: '#24131a', card: '#381d29', accent: '#f276a4' },
+];
 
 export default function App() {
   const [activeScreen, setActiveScreen] = useState('home');
   const [displayName, setDisplayName] = useState('Your Name');
+  const [username, setUsername] = useState('@yourname');
   const [email, setEmail] = useState('you@example.com');
   const [phone, setPhone] = useState('+1 000 000 0000');
+  const [profileImageUri, setProfileImageUri] = useState('');
+  const [shareDescription, setShareDescription] = useState('Let\'s connect on ContactLess.');
+  const [themeId, setThemeId] = useState('ocean');
   const [notes, setNotes] = useState([]);
   const [isNotesHydrated, setIsNotesHydrated] = useState(false);
+  const [isPrefsHydrated, setIsPrefsHydrated] = useState(false);
   const [isNfcEnabled, setIsNfcEnabled] = useState(false);
   const [accounts, setAccounts] = useState(DEFAULT_ACCOUNTS);
   const screenAnim = useRef(new Animated.Value(1)).current;
   const latestNotesRef = useRef(notes);
+  const latestPrefsRef = useRef({
+    displayName,
+    username,
+    email,
+    phone,
+    profileImageUri,
+    shareDescription,
+    themeId,
+    isNfcEnabled,
+  });
   const canPersistNotes = Platform.OS === 'ios';
+  const canPersistPrefs = Platform.OS === 'ios';
+  const activeTheme = useMemo(
+    () => THEME_PRESETS.find((item) => item.id === themeId) ?? THEME_PRESETS[0],
+    [themeId]
+  );
 
   const connectedCount = useMemo(
     () => accounts.filter((item) => item.connected).length,
@@ -94,6 +129,19 @@ export default function App() {
     latestNotesRef.current = notes;
   }, [notes]);
 
+  useEffect(() => {
+    latestPrefsRef.current = {
+      displayName,
+      username,
+      email,
+      phone,
+      profileImageUri,
+      shareDescription,
+      themeId,
+      isNfcEnabled,
+    };
+  }, [displayName, username, email, phone, profileImageUri, shareDescription, themeId, isNfcEnabled]);
+
   const persistNotes = (nextNotes) => {
     if (!canPersistNotes) {
       return;
@@ -103,6 +151,18 @@ export default function App() {
       Settings.set({ [NOTES_STORAGE_KEY]: JSON.stringify(nextNotes) });
     } catch (error) {
       console.warn('Unable to save notes:', error);
+    }
+  };
+
+  const persistPrefs = (nextPrefs) => {
+    if (!canPersistPrefs) {
+      return;
+    }
+
+    try {
+      Settings.set({ [PREFS_STORAGE_KEY]: JSON.stringify(nextPrefs) });
+    } catch (error) {
+      console.warn('Unable to save app preferences:', error);
     }
   };
 
@@ -136,9 +196,84 @@ export default function App() {
   }, [isNotesHydrated, notes]);
 
   useEffect(() => {
+    if (!canPersistPrefs) {
+      setIsPrefsHydrated(true);
+      return;
+    }
+
+    try {
+      const saved = Settings.get(PREFS_STORAGE_KEY);
+      if (typeof saved === 'string') {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') {
+          if (typeof parsed.displayName === 'string') {
+            setDisplayName(parsed.displayName);
+          }
+          if (typeof parsed.username === 'string') {
+            setUsername(parsed.username);
+          }
+          if (typeof parsed.email === 'string') {
+            setEmail(parsed.email);
+          }
+          if (typeof parsed.phone === 'string') {
+            setPhone(parsed.phone);
+          }
+          if (typeof parsed.profileImageUri === 'string') {
+            setProfileImageUri(parsed.profileImageUri);
+          }
+          if (typeof parsed.shareDescription === 'string') {
+            setShareDescription(parsed.shareDescription);
+          }
+          if (
+            typeof parsed.themeId === 'string' &&
+            THEME_PRESETS.some((item) => item.id === parsed.themeId)
+          ) {
+            setThemeId(parsed.themeId);
+          }
+          if (typeof parsed.isNfcEnabled === 'boolean') {
+            setIsNfcEnabled(parsed.isNfcEnabled);
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Unable to load app preferences:', error);
+    } finally {
+      setIsPrefsHydrated(true);
+    }
+  }, [canPersistPrefs]);
+
+  useEffect(() => {
+    if (!isPrefsHydrated) {
+      return;
+    }
+
+    persistPrefs({
+      displayName,
+      username,
+      email,
+      phone,
+      profileImageUri,
+      shareDescription,
+      themeId,
+      isNfcEnabled,
+    });
+  }, [
+    displayName,
+    username,
+    email,
+    phone,
+    profileImageUri,
+    shareDescription,
+    themeId,
+    isNfcEnabled,
+    isPrefsHydrated,
+  ]);
+
+  useEffect(() => {
     const sub = AppState.addEventListener('change', (nextState) => {
       if (nextState === 'inactive' || nextState === 'background') {
         persistNotes(latestNotesRef.current);
+        persistPrefs(latestPrefsRef.current);
       }
     });
 
@@ -152,9 +287,11 @@ export default function App() {
       return (
         <HomeScreen
           displayName={displayName}
+          username={username}
           email={email}
           phone={phone}
           stats={homeStats}
+          theme={activeTheme}
         />
       );
     }
@@ -177,9 +314,13 @@ export default function App() {
       return (
         <ShareScreen
           displayName={displayName}
+          username={username}
           email={email}
           phone={phone}
           isNfcEnabled={isNfcEnabled}
+          profileImageUri={profileImageUri}
+          shareDescription={shareDescription}
+          theme={activeTheme}
         />
       );
     }
@@ -188,23 +329,35 @@ export default function App() {
       <SettingsScreen
         displayName={displayName}
         onChangeDisplayName={setDisplayName}
+        username={username}
+        onChangeUsername={setUsername}
         email={email}
         onChangeEmail={setEmail}
         phone={phone}
         onChangePhone={setPhone}
         isNfcEnabled={isNfcEnabled}
         onToggleNfc={setIsNfcEnabled}
+        profileImageUri={profileImageUri}
+        onChangeProfileImageUri={setProfileImageUri}
+        shareDescription={shareDescription}
+        onChangeShareDescription={setShareDescription}
+        themeId={themeId}
+        themePresets={THEME_PRESETS}
+        onChangeThemeId={setThemeId}
+        theme={activeTheme}
       />
     );
   };
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: activeTheme.background }]}>
         <StatusBar barStyle="light-content" />
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: activeTheme.background }]}>
           <Text style={styles.headerTitle}>ContactLess</Text>
-          <Text style={styles.headerSubtitle}>NFC Contact Share Baseline</Text>
+          <Text style={[styles.headerSubtitle, { color: activeTheme.accent }]}>
+            NFC Contact Share Baseline
+          </Text>
 
           <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
             <Animated.View
@@ -224,7 +377,7 @@ export default function App() {
             </Animated.View>
           </ScrollView>
 
-          <BottomNav activeScreen={activeScreen} onChange={setActiveScreen} />
+          <BottomNav activeScreen={activeScreen} onChange={setActiveScreen} theme={activeTheme} />
         </View>
       </SafeAreaView>
     </SafeAreaProvider>
