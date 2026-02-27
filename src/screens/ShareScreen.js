@@ -13,11 +13,12 @@ export default function ShareScreen({
 }) {
   const initials = displayName?.trim()?.slice(0, 1)?.toUpperCase() || '?';
   const cleanUsername = username?.trim();
+  const descriptionColor = `${(theme?.accent ?? '#9eb1ce')}CC`;
 
   return (
     <View>
       <Text style={styles.screenTitle}>Share</Text>
-      <Text style={styles.screenSubtitle}>
+      <Text style={[styles.screenSubtitle, { color: descriptionColor }]}>
         Choose how you want to share your contact card right now.
       </Text>
 
@@ -33,7 +34,7 @@ export default function ShareScreen({
           )}
           <View>
             <Text style={styles.previewLine}>{displayName}</Text>
-            {cleanUsername ? <Text style={styles.handleLine}>{cleanUsername}</Text> : null}
+            {cleanUsername ? <Text style={[styles.handleLine, { color: descriptionColor }]}>{cleanUsername}</Text> : null}
           </View>
         </View>
         {shareDescription?.trim() ? (
@@ -45,9 +46,11 @@ export default function ShareScreen({
 
       <View style={[styles.card, { backgroundColor: theme?.card ?? '#13233a' }]}>
         <Text style={styles.cardLabel}>Share Methods</Text>
-        <Text style={styles.cardMuted}>NFC: {isNfcEnabled ? 'Enabled' : 'Disabled'}</Text>
-        <Text style={styles.cardMuted}>QR: Ready</Text>
-        <Text style={styles.cardMuted}>Link: Ready</Text>
+        <Text style={[styles.cardMuted, { color: descriptionColor }]}>
+          NFC: {isNfcEnabled ? 'Enabled' : 'Disabled'}
+        </Text>
+        <Text style={[styles.cardMuted, { color: descriptionColor }]}>QR: Ready</Text>
+        <Text style={[styles.cardMuted, { color: descriptionColor }]}>Link: Ready</Text>
       </View>
     </View>
   );

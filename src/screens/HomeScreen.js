@@ -2,6 +2,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 export default function HomeScreen({ displayName, username, email, phone, stats, theme }) {
+  const descriptionColor = `${(theme?.accent ?? '#9eb1ce')}CC`;
   const kpis = [
     { id: 'people', label: 'People Shared', value: `${stats.totalPeopleShared}` },
     { id: 'today', label: 'Today', value: `${stats.todayShares}` },
@@ -12,7 +13,9 @@ export default function HomeScreen({ displayName, username, email, phone, stats,
   return (
     <View>
       <Text style={styles.screenTitle}>Home</Text>
-      <Text style={styles.screenSubtitle}>Quick-glance share activity and operational updates.</Text>
+      <Text style={[styles.screenSubtitle, { color: descriptionColor }]}>
+        Quick-glance share activity and operational updates.
+      </Text>
 
       <View style={[styles.card, { backgroundColor: theme?.card ?? '#13233a' }]}>
         <Text style={styles.cardLabel}>Performance Snapshot</Text>
@@ -45,22 +48,26 @@ export default function HomeScreen({ displayName, username, email, phone, stats,
             <Text style={styles.previewLine}>
               {item.name} - {item.method}
             </Text>
-            <Text style={styles.cardMuted}>{item.timeAgo}</Text>
+            <Text style={[styles.cardMuted, { color: descriptionColor }]}>{item.timeAgo}</Text>
           </View>
         ))}
       </View>
 
       <View style={[styles.card, { backgroundColor: theme?.card ?? '#13233a' }]}>
         <Text style={styles.cardLabel}>Ops At A Glance</Text>
-        <Text style={styles.cardMuted}>Weekly goal: {stats.weeklyGoalPercent}% complete</Text>
-        <Text style={styles.cardMuted}>Hotfixes deployed today: {stats.deployedToday}</Text>
-        <Text style={styles.cardMuted}>
+        <Text style={[styles.cardMuted, { color: descriptionColor }]}>
+          Weekly goal: {stats.weeklyGoalPercent}% complete
+        </Text>
+        <Text style={[styles.cardMuted, { color: descriptionColor }]}>
+          Hotfixes deployed today: {stats.deployedToday}
+        </Text>
+        <Text style={[styles.cardMuted, { color: descriptionColor }]}>
           Providers connected: {stats.connectedProviders} / 3
         </Text>
-        <Text style={styles.cardMuted}>Default profile: {displayName}</Text>
-        <Text style={styles.cardMuted}>Username: {username}</Text>
-        <Text style={styles.cardMuted}>{email}</Text>
-        <Text style={styles.cardMuted}>{phone}</Text>
+        <Text style={[styles.cardMuted, { color: descriptionColor }]}>Default profile: {displayName}</Text>
+        <Text style={[styles.cardMuted, { color: descriptionColor }]}>Username: {username}</Text>
+        <Text style={[styles.cardMuted, { color: descriptionColor }]}>{email}</Text>
+        <Text style={[styles.cardMuted, { color: descriptionColor }]}>{phone}</Text>
       </View>
     </View>
   );

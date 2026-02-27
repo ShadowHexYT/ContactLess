@@ -2,12 +2,15 @@ import React, { useMemo, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { Alert, Modal, Pressable, Share, StyleSheet, Text, TextInput, View } from 'react-native';
 
-export default function NotesScreen({ notes, onChangeNotes }) {
+export default function NotesScreen({ notes, onChangeNotes, theme }) {
   const [query, setQuery] = useState('');
   const [activeNoteId, setActiveNoteId] = useState(null);
   const [pendingDeleteNoteId, setPendingDeleteNoteId] = useState(null);
   const [deleteArmedNoteId, setDeleteArmedNoteId] = useState(null);
   const notePreviewMaxLength = 31;
+  const accentColor = theme?.accent ?? '#2d76f9';
+  const descriptionColor = `${accentColor}CC`;
+  const accentBorder = `${accentColor}99`;
 
   const filteredNotes = useMemo(() => {
     const cleanQuery = query.trim().toLowerCase();
@@ -109,9 +112,12 @@ export default function NotesScreen({ notes, onChangeNotes }) {
   const confirmDeleteModal = (
     <Modal visible={Boolean(pendingDeleteNote)} transparent animationType="fade">
       <Pressable style={styles.modalBackdrop} onPress={cancelDeleteNote}>
-        <Pressable style={styles.modalCard} onPress={() => {}}>
+        <Pressable
+          style={[styles.modalCard, { backgroundColor: theme?.card ?? '#13233a', borderColor: accentBorder }]}
+          onPress={() => {}}
+        >
           <Text style={styles.modalTitle}>Delete Note</Text>
-          <Text style={styles.screenSubtitle}>
+          <Text style={[styles.screenSubtitle, { color: descriptionColor }]}>
             Are you sure you want to delete this note? It will be lost forever.
           </Text>
           <Text style={styles.confirmNoteName}>
@@ -119,7 +125,7 @@ export default function NotesScreen({ notes, onChangeNotes }) {
           </Text>
 
           <View style={styles.confirmActions}>
-            <Pressable style={styles.backButton} onPress={cancelDeleteNote}>
+            <Pressable style={[styles.backButton, { borderColor: accentBorder }]} onPress={cancelDeleteNote}>
               <Text style={styles.backButtonText}>Cancel</Text>
             </Pressable>
             <Pressable style={styles.confirmDeleteButton} onPress={confirmDeleteNote}>
@@ -136,11 +142,11 @@ export default function NotesScreen({ notes, onChangeNotes }) {
       <>
       <View>
         <View style={styles.detailTopRow}>
-          <Pressable style={styles.backButton} onPress={() => setActiveNoteId(null)}>
+          <Pressable style={[styles.backButton, { borderColor: accentBorder }]} onPress={() => setActiveNoteId(null)}>
             <Text style={styles.backButtonText}>←</Text>
           </Pressable>
           <Pressable
-            style={[styles.removeButton, styles.detailRemoveButton]}
+            style={[styles.removeButton, styles.detailRemoveButton, { borderColor: accentBorder }]}
             onPress={() => requestDeleteNote(activeNote.id)}
           >
             <Text style={styles.detailRemoveButtonText}>Delete</Text>
@@ -148,7 +154,7 @@ export default function NotesScreen({ notes, onChangeNotes }) {
         </View>
 
         <TextInput
-          style={[styles.input, styles.titleInput]}
+          style={[styles.input, styles.titleInput, { backgroundColor: theme?.card ?? '#13233a', borderColor: accentBorder }]}
           value={activeNote.title}
           onChangeText={(text) => handleChangeNote(activeNote.id, 'title', text)}
           placeholder="Title"
@@ -156,7 +162,7 @@ export default function NotesScreen({ notes, onChangeNotes }) {
         />
 
         <TextInput
-          style={[styles.input, styles.noteBodyInput]}
+          style={[styles.input, styles.noteBodyInput, { backgroundColor: theme?.card ?? '#13233a', borderColor: accentBorder }]}
           value={activeNote.body}
           onChangeText={(text) => handleChangeNote(activeNote.id, 'body', text)}
           placeholder="Type note details..."
@@ -165,9 +171,11 @@ export default function NotesScreen({ notes, onChangeNotes }) {
         />
 
         <View style={styles.visibilityRow}>
-          <Text style={styles.visibilityLabel}>Hide note content on notes screen</Text>
+          <Text style={[styles.visibilityLabel, { color: descriptionColor }]}>
+            Hide note content on notes screen
+          </Text>
           <Pressable
-            style={styles.visibilityToggle}
+            style={[styles.visibilityToggle, { borderColor: accentBorder }]}
             onPress={() =>
               handleChangeNote(activeNote.id, 'isHidden', !Boolean(activeNote.isHidden))
             }
@@ -175,12 +183,12 @@ export default function NotesScreen({ notes, onChangeNotes }) {
             <Ionicons
               name={activeNote.isHidden ? 'eye-off-outline' : 'eye-outline'}
               size={22}
-              color="#b8c9e2"
+              color={descriptionColor}
             />
           </Pressable>
         </View>
 
-        <Pressable style={styles.saveButton} onPress={() => setActiveNoteId(null)}>
+        <Pressable style={[styles.saveButton, { backgroundColor: accentColor }]} onPress={() => setActiveNoteId(null)}>
           <Text style={styles.saveButtonText}>Save</Text>
         </Pressable>
       </View>
@@ -193,13 +201,13 @@ export default function NotesScreen({ notes, onChangeNotes }) {
     <>
     <Pressable style={styles.screenWrap} onPress={() => setDeleteArmedNoteId(null)}>
       <Text style={styles.screenTitle}>Notes</Text>
-      <Text style={styles.screenSubtitle}>
+      <Text style={[styles.screenSubtitle, { color: descriptionColor }]}>
         Tap a note to open it. Content shows by default unless hidden in note settings.
       </Text>
 
       <View style={styles.searchWrap}>
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { backgroundColor: theme?.card ?? '#13233a', borderColor: accentBorder }]}
           value={query}
           onChangeText={setQuery}
           placeholder="Search all notes"
@@ -213,7 +221,7 @@ export default function NotesScreen({ notes, onChangeNotes }) {
         <Text style={styles.cardLabel}>Personal Notes ({notes.length})</Text>
         <View style={styles.actionButtons}>
           <Pressable
-            style={styles.exportButton}
+            style={[styles.exportButton, { borderColor: accentBorder }]}
             onPress={(event) => {
               event.stopPropagation();
               if (deleteArmedNoteId !== null) {
@@ -222,10 +230,10 @@ export default function NotesScreen({ notes, onChangeNotes }) {
               handleExportNotes();
             }}
           >
-            <Text style={styles.exportButtonText}>Export</Text>
+            <Text style={[styles.exportButtonText, { color: descriptionColor }]}>Export</Text>
           </Pressable>
           <Pressable
-            style={styles.addButton}
+            style={[styles.addButton, { backgroundColor: accentColor }]}
             onPress={(event) => {
               event.stopPropagation();
               if (deleteArmedNoteId !== null) {
@@ -244,7 +252,7 @@ export default function NotesScreen({ notes, onChangeNotes }) {
         {filteredNotes.map((note) => (
           <Pressable
             key={note.id}
-            style={styles.card}
+            style={[styles.card, { backgroundColor: theme?.card ?? '#13233a' }]}
             onLongPress={() => setDeleteArmedNoteId(note.id)}
             delayLongPress={260}
             onPress={(event) => {
@@ -262,7 +270,7 @@ export default function NotesScreen({ notes, onChangeNotes }) {
               </Text>
               {deleteArmedNoteId !== null ? (
                 <Pressable
-                  style={styles.removeButton}
+                  style={[styles.removeButton, { borderColor: accentBorder }]}
                   onPress={(event) => {
                     event.stopPropagation();
                     requestDeleteNote(note.id);
@@ -290,7 +298,7 @@ export default function NotesScreen({ notes, onChangeNotes }) {
       </View>
 
       {filteredNotes.length === 0 && (
-        <Text style={styles.emptyState}>You have no notes, add some!</Text>
+        <Text style={[styles.emptyState, { color: descriptionColor }]}>You have no notes, add some!</Text>
       )}
     </Pressable>
     {confirmDeleteModal}
@@ -457,7 +465,7 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
   },
   backButtonText: {
-    color: '#b8c9e2',
+    color: '#d9e3f0',
     fontSize: 13,
     fontWeight: '600',
   },
@@ -477,12 +485,12 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
   },
   detailRemoveButtonText: {
-    color: '#b8c9e2',
+    color: '#d9e3f0',
     fontSize: 13,
     fontWeight: '600',
   },
   cardRemoveButtonText: {
-    color: '#b8c9e2',
+    color: '#d9e3f0',
     fontSize: 13,
     fontWeight: '700',
   },

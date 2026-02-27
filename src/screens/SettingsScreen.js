@@ -22,6 +22,10 @@ export default function SettingsScreen({
   theme,
 }) {
   const initials = displayName?.trim()?.slice(0, 1)?.toUpperCase() || '?';
+  const accentColor = theme?.accent ?? '#2d76f9';
+  const descriptionColor = `${accentColor}CC`;
+  const accentBorder = `${accentColor}99`;
+  const fieldBackground = theme?.background ?? '#0d1726';
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const [isPhotoMenuOpen, setIsPhotoMenuOpen] = useState(false);
   const [photoDraft, setPhotoDraft] = useState(profileImageUri);
@@ -64,21 +68,21 @@ export default function SettingsScreen({
   return (
     <View>
       <Text style={styles.screenTitle}>Settings</Text>
-      <Text style={styles.screenSubtitle}>
+      <Text style={[styles.screenSubtitle, { color: descriptionColor }]}>
         Configure profile fields, theme, and share card appearance.
       </Text>
 
       <View style={[styles.card, { backgroundColor: theme?.card ?? '#13233a' }]}>
         <Text style={styles.cardLabel}>Contact Information</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: fieldBackground, borderColor: accentBorder }]}
           value={displayName}
           onChangeText={onChangeDisplayName}
           placeholder="Display name"
           placeholderTextColor="#6d7888"
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: fieldBackground, borderColor: accentBorder }]}
           value={username}
           onChangeText={onChangeUsername}
           placeholder="@username"
@@ -87,7 +91,7 @@ export default function SettingsScreen({
           autoCorrect={false}
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: fieldBackground, borderColor: accentBorder }]}
           value={email}
           onChangeText={onChangeEmail}
           keyboardType="email-address"
@@ -96,7 +100,7 @@ export default function SettingsScreen({
           placeholderTextColor="#6d7888"
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: fieldBackground, borderColor: accentBorder }]}
           value={phone}
           onChangeText={onChangePhone}
           keyboardType="phone-pad"
@@ -122,16 +126,20 @@ export default function SettingsScreen({
                 <Text style={styles.avatarFallbackText}>{initials}</Text>
               </View>
             )}
-            <View style={styles.plusBadge}>
+            <View style={[styles.plusBadge, { backgroundColor: accentColor, borderColor: accentBorder }]}>
               <Text style={styles.plusBadgeText}>+</Text>
             </View>
           </Pressable>
-          <Text style={styles.cardMuted}>
+          <Text style={[styles.cardMuted, { color: descriptionColor }]}>
             This message appears with your name and image when sharing.
           </Text>
         </View>
         <TextInput
-          style={[styles.input, styles.messageInput]}
+          style={[
+            styles.input,
+            styles.messageInput,
+            { backgroundColor: fieldBackground, borderColor: accentBorder },
+          ]}
           value={shareDescription}
           onChangeText={onChangeShareDescription}
           placeholder="Write a short message for your share card..."
@@ -142,9 +150,12 @@ export default function SettingsScreen({
 
       <View style={[styles.card, { backgroundColor: theme?.card ?? '#13233a' }]}>
         <Text style={styles.cardLabel}>Theme Colors</Text>
-        <Pressable style={styles.dropdownButton} onPress={() => setIsThemeMenuOpen(true)}>
+        <Pressable
+          style={[styles.dropdownButton, { backgroundColor: fieldBackground, borderColor: accentBorder }]}
+          onPress={() => setIsThemeMenuOpen(true)}
+        >
           <Text style={styles.dropdownButtonText}>{activeThemeLabel}</Text>
-          <Text style={styles.dropdownChevron}>▼</Text>
+          <Text style={[styles.dropdownChevron, { color: descriptionColor }]}>▼</Text>
         </Pressable>
       </View>
 
@@ -153,14 +164,17 @@ export default function SettingsScreen({
           <Text style={styles.rowLabel}>Enable NFC Sharing</Text>
           <Switch value={isNfcEnabled} onValueChange={onToggleNfc} />
         </View>
-        <Text style={styles.cardMuted}>
+        <Text style={[styles.cardMuted, { color: descriptionColor }]}>
           Placeholder toggle only. NFC permissions/session setup will be added in the next phase.
         </Text>
       </View>
 
       <Modal visible={isThemeMenuOpen} transparent animationType="fade">
         <Pressable style={styles.modalBackdrop} onPress={() => setIsThemeMenuOpen(false)}>
-          <Pressable style={styles.modalCard} onPress={() => {}}>
+          <Pressable
+            style={[styles.modalCard, { backgroundColor: theme?.card ?? '#13233a', borderColor: accentBorder }]}
+            onPress={() => {}}
+          >
             <Text style={styles.modalTitle}>Select Theme</Text>
             {themePresets.map((preset) => (
               <Pressable
@@ -173,7 +187,9 @@ export default function SettingsScreen({
               >
                 <View style={[styles.themeDot, { backgroundColor: preset.accent }]} />
                 <Text style={styles.themeOptionText}>{preset.label}</Text>
-                {preset.id === themeId ? <Text style={styles.themeSelected}>Selected</Text> : null}
+                {preset.id === themeId ? (
+                  <Text style={[styles.themeSelected, { color: descriptionColor }]}>Selected</Text>
+                ) : null}
               </Pressable>
             ))}
           </Pressable>
@@ -182,10 +198,13 @@ export default function SettingsScreen({
 
       <Modal visible={isPhotoMenuOpen} transparent animationType="fade">
         <Pressable style={styles.modalBackdrop} onPress={() => setIsPhotoMenuOpen(false)}>
-          <Pressable style={styles.modalCard} onPress={() => {}}>
+          <Pressable
+            style={[styles.modalCard, { backgroundColor: theme?.card ?? '#13233a', borderColor: accentBorder }]}
+            onPress={() => {}}
+          >
             <Text style={styles.modalTitle}>Change Photo</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: fieldBackground, borderColor: accentBorder }]}
               value={photoDraft}
               onChangeText={setPhotoDraft}
               placeholder="Paste image URL (https://...)"
@@ -193,7 +212,7 @@ export default function SettingsScreen({
               autoCapitalize="none"
               autoCorrect={false}
             />
-            <Pressable style={styles.libraryButton} onPress={pickFromLibrary}>
+            <Pressable style={[styles.libraryButton, { borderColor: accentBorder }]} onPress={pickFromLibrary}>
               <Text style={styles.libraryButtonText}>Upload From Library</Text>
             </Pressable>
             <View style={styles.photoActions}>
@@ -214,7 +233,7 @@ export default function SettingsScreen({
                 <Text style={styles.actionButtonText}>Cancel</Text>
               </Pressable>
               <Pressable
-                style={[styles.actionButton, styles.saveButton]}
+                style={[styles.actionButton, styles.saveButton, { backgroundColor: accentColor }]}
                 onPress={() => {
                   onChangeProfileImageUri(photoDraft.trim());
                   setIsPhotoMenuOpen(false);

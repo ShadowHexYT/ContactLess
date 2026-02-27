@@ -5,6 +5,7 @@ import { Animated, Easing, StyleSheet, Text, TouchableOpacity, View } from 'reac
 const NAV_INSET = 8;
 
 export default function BottomNav({ activeScreen, onChange, theme }) {
+  const inactiveColor = `${(theme?.accent ?? '#c4d3eb')}CC`;
   const tabs = [
     { key: 'home', label: 'Home', icon: 'home-outline', activeIcon: 'home' },
     {
@@ -49,12 +50,13 @@ export default function BottomNav({ activeScreen, onChange, theme }) {
       <Ionicons
         name={activeScreen === key ? activeIcon : icon}
         size={20}
-        color={activeScreen === key ? '#ffffff' : '#c4d3eb'}
+        color={activeScreen === key ? '#ffffff' : inactiveColor}
         style={styles.navButtonIcon}
       />
       <Text
         style={[
           styles.navButtonText,
+          { color: activeScreen === key ? '#ffffff' : inactiveColor },
           activeScreen === key && styles.navButtonTextActive,
           key === 'share' && styles.shareText,
         ]}

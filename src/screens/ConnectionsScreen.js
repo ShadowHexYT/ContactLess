@@ -1,15 +1,17 @@
 ﻿import React from 'react';
 import { StyleSheet, Switch, Text, View } from 'react-native';
 
-export default function ConnectionsScreen({ accounts, connectedCount, onToggleAccount }) {
+export default function ConnectionsScreen({ accounts, connectedCount, onToggleAccount, theme }) {
+  const descriptionColor = `${(theme?.accent ?? '#9eb1ce')}CC`;
+
   return (
     <View>
       <Text style={styles.screenTitle}>Account Connections</Text>
-      <Text style={styles.screenSubtitle}>
+      <Text style={[styles.screenSubtitle, { color: descriptionColor }]}>
         Link contact providers now. Actual auth can be implemented next.
       </Text>
 
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: theme?.card ?? '#13233a' }]}>
         <Text style={styles.cardLabel}>Connected: {connectedCount}/{accounts.length}</Text>
         {accounts.map((item) => (
           <View key={item.id} style={styles.rowBetween}>

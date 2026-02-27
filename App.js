@@ -302,12 +302,13 @@ export default function App() {
           accounts={accounts}
           connectedCount={connectedCount}
           onToggleAccount={toggleAccount}
+          theme={activeTheme}
         />
       );
     }
 
     if (activeScreen === 'notes') {
-      return <NotesScreen notes={notes} onChangeNotes={setNotes} />;
+      return <NotesScreen notes={notes} onChangeNotes={setNotes} theme={activeTheme} />;
     }
 
     if (activeScreen === 'share') {
