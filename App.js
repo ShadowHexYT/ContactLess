@@ -4,6 +4,7 @@ import {
   AppState,
   Easing,
   Platform,
+  Share,
   ScrollView,
   Settings,
   StatusBar,
@@ -37,6 +38,16 @@ const HOTFIX_LIST = [
   { id: 'h2', title: 'Contact card truncation patch', status: 'Shipped' },
   { id: 'h3', title: 'QR scan latency reduction', status: 'In QA' },
 ];
+const DEFAULT_PROFILE = {
+  displayName: 'Your Name',
+  username: '@yourname',
+  email: 'you@example.com',
+  phone: '+1 000 000 0000',
+  profileImageUri: '',
+  shareDescription: 'Let\'s connect on ContactLess.',
+  themeId: 'ocean',
+  isNfcEnabled: false,
+};
 const NOTES_STORAGE_KEY = 'contactless.notes';
 const PREFS_STORAGE_KEY = 'contactless.prefs';
 const THEME_PRESETS = [
@@ -56,17 +67,17 @@ const THEME_PRESETS = [
 
 export default function App() {
   const [activeScreen, setActiveScreen] = useState('home');
-  const [displayName, setDisplayName] = useState('Your Name');
-  const [username, setUsername] = useState('@yourname');
-  const [email, setEmail] = useState('you@example.com');
-  const [phone, setPhone] = useState('+1 000 000 0000');
-  const [profileImageUri, setProfileImageUri] = useState('');
-  const [shareDescription, setShareDescription] = useState('Let\'s connect on ContactLess.');
-  const [themeId, setThemeId] = useState('ocean');
+  const [displayName, setDisplayName] = useState(DEFAULT_PROFILE.displayName);
+  const [username, setUsername] = useState(DEFAULT_PROFILE.username);
+  const [email, setEmail] = useState(DEFAULT_PROFILE.email);
+  const [phone, setPhone] = useState(DEFAULT_PROFILE.phone);
+  const [profileImageUri, setProfileImageUri] = useState(DEFAULT_PROFILE.profileImageUri);
+  const [shareDescription, setShareDescription] = useState(DEFAULT_PROFILE.shareDescription);
+  const [themeId, setThemeId] = useState(DEFAULT_PROFILE.themeId);
   const [notes, setNotes] = useState([]);
   const [isNotesHydrated, setIsNotesHydrated] = useState(false);
   const [isPrefsHydrated, setIsPrefsHydrated] = useState(false);
-  const [isNfcEnabled, setIsNfcEnabled] = useState(false);
+  const [isNfcEnabled, setIsNfcEnabled] = useState(DEFAULT_PROFILE.isNfcEnabled);
   const [accounts, setAccounts] = useState(DEFAULT_ACCOUNTS);
   const screenAnim = useRef(new Animated.Value(1)).current;
   const latestNotesRef = useRef(notes);
@@ -113,6 +124,45 @@ export default function App() {
         item.id === id ? { ...item, connected: !item.connected } : item
       )
     );
+  };
+
+  const exportUserData = async () => {
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      profile: {
+        displayName,
+        username,
+        email,
+        phone,
+        profileImageUri,
+        shareDescription,
+        themeId,
+        isNfcEnabled,
+      },
+      notes,
+      accounts,
+    };
+
+    await Share.share({
+      title: 'ContactLess User Data',
+      subject: 'ContactLess User Data Export',
+      message: JSON.stringify(payload, null, 2),
+    });
+  };
+
+  const deleteAllUserData = () => {
+    setDisplayName(DEFAULT_PROFILE.displayName);
+    setUsername(DEFAULT_PROFILE.username);
+    setEmail(DEFAULT_PROFILE.email);
+    setPhone(DEFAULT_PROFILE.phone);
+    setProfileImageUri(DEFAULT_PROFILE.profileImageUri);
+    setShareDescription(DEFAULT_PROFILE.shareDescription);
+    setThemeId(DEFAULT_PROFILE.themeId);
+    setIsNfcEnabled(DEFAULT_PROFILE.isNfcEnabled);
+    setNotes([]);
+    setAccounts(DEFAULT_ACCOUNTS);
+    persistNotes([]);
+    persistPrefs(DEFAULT_PROFILE);
   };
 
   useEffect(() => {
@@ -346,6 +396,8 @@ export default function App() {
         themePresets={THEME_PRESETS}
         onChangeThemeId={setThemeId}
         theme={activeTheme}
+        onExportUserData={exportUserData}
+        onDeleteUserData={deleteAllUserData}
       />
     );
   };

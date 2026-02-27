@@ -21,6 +21,8 @@ export default function SettingsScreen({
   themePresets,
   onChangeThemeId,
   theme,
+  onExportUserData,
+  onDeleteUserData,
 }) {
   const initials = displayName?.trim()?.slice(0, 1)?.toUpperCase() || '?';
   const accentColor = theme?.accent ?? '#2d76f9';
@@ -65,49 +67,26 @@ export default function SettingsScreen({
       );
     }
   };
+  const confirmDeleteUserData = () => {
+    Alert.alert(
+      'Delete All User Data',
+      'This will erase profile settings, notes, and saved preferences on this device.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: onDeleteUserData,
+        },
+      ]
+    );
+  };
 
   return (
     <View>
       <View style={styles.headerRow}>
         <Ionicons name="settings" size={20} color={descriptionColor} style={styles.headerIcon} />
         <Text style={styles.screenTitle}>Settings</Text>
-      </View>
-
-      <View style={[styles.card, { backgroundColor: theme?.card ?? '#13233a' }]}>
-        <Text style={styles.cardLabel}>Contact Information</Text>
-        <TextInput
-          style={[styles.input, { backgroundColor: fieldBackground, borderColor: accentBorder }]}
-          value={displayName}
-          onChangeText={onChangeDisplayName}
-          placeholder="Display name"
-          placeholderTextColor="#6d7888"
-        />
-        <TextInput
-          style={[styles.input, { backgroundColor: fieldBackground, borderColor: accentBorder }]}
-          value={username}
-          onChangeText={onChangeUsername}
-          placeholder="@username"
-          placeholderTextColor="#6d7888"
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-        <TextInput
-          style={[styles.input, { backgroundColor: fieldBackground, borderColor: accentBorder }]}
-          value={email}
-          onChangeText={onChangeEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          placeholder="Email"
-          placeholderTextColor="#6d7888"
-        />
-        <TextInput
-          style={[styles.input, { backgroundColor: fieldBackground, borderColor: accentBorder }]}
-          value={phone}
-          onChangeText={onChangePhone}
-          keyboardType="phone-pad"
-          placeholder="Phone"
-          placeholderTextColor="#6d7888"
-        />
       </View>
 
       <View style={[styles.card, { backgroundColor: theme?.card ?? '#13233a' }]}>
@@ -131,9 +110,19 @@ export default function SettingsScreen({
               <Text style={styles.plusBadgeText}>+</Text>
             </View>
           </Pressable>
-          <Text style={[styles.cardMuted, { color: descriptionColor }]}>
-            This message appears with your name and image when sharing.
-          </Text>
+          <TextInput
+            style={[
+              styles.input,
+              styles.usernameInlineInput,
+              { backgroundColor: fieldBackground, borderColor: accentBorder },
+            ]}
+            value={username}
+            onChangeText={onChangeUsername}
+            placeholder="@username"
+            placeholderTextColor="#6d7888"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
         </View>
         <TextInput
           style={[
@@ -168,6 +157,29 @@ export default function SettingsScreen({
         <Text style={[styles.cardMuted, { color: descriptionColor }]}>
           Placeholder toggle only. NFC permissions/session setup will be added in the next phase.
         </Text>
+      </View>
+
+      <View style={[styles.card, { backgroundColor: theme?.card ?? '#13233a' }]}>
+        <View style={styles.dataActionRow}>
+          <Pressable
+            style={[styles.dataActionButton, { borderColor: accentBorder }]}
+            onPress={async () => {
+              try {
+                await onExportUserData();
+              } catch (error) {
+                Alert.alert('Export Failed', 'Unable to export user data right now.');
+              }
+            }}
+          >
+            <Text style={styles.dataActionText}>Export User Data</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.dataActionButton, styles.deleteDataButton]}
+            onPress={confirmDeleteUserData}
+          >
+            <Text style={styles.dataActionText}>Delete All Data</Text>
+          </Pressable>
+        </View>
       </View>
 
       <Modal visible={isThemeMenuOpen} transparent animationType="fade">
@@ -338,6 +350,10 @@ const styles = StyleSheet.create({
     minHeight: 84,
     textAlignVertical: 'top',
   },
+  usernameInlineInput: {
+    flex: 1,
+    marginBottom: 0,
+  },
   rowBetween: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -349,6 +365,28 @@ const styles = StyleSheet.create({
     fontSize: 15,
     flex: 1,
     marginRight: 8,
+  },
+  dataActionRow: {
+    flexDirection: 'row',
+  },
+  dataActionButton: {
+    flex: 1,
+    borderRadius: 10,
+    borderWidth: 1,
+    marginRight: 8,
+    paddingVertical: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deleteDataButton: {
+    marginRight: 0,
+    backgroundColor: '#8f2b2b',
+    borderColor: '#8f2b2b',
+  },
+  dataActionText: {
+    color: '#f2f7ff',
+    fontWeight: '700',
+    fontSize: 12,
   },
   dropdownButton: {
     backgroundColor: '#0d1726',
