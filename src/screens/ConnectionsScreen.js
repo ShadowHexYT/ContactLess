@@ -1,6 +1,13 @@
-﻿import React from 'react';
+import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, Switch, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+
+const ICON_BY_ACCOUNT = {
+  google: 'logo-google',
+  icloud: 'logo-apple',
+  outlook: 'logo-microsoft',
+  spotify: 'logo-spotify',
+};
 
 export default function ConnectionsScreen({ accounts, connectedCount, onToggleAccount, theme }) {
   const descriptionColor = `${(theme?.accent ?? '#9eb1ce')}CC`;
@@ -14,12 +21,41 @@ export default function ConnectionsScreen({ accounts, connectedCount, onToggleAc
 
       <View style={[styles.card, { backgroundColor: theme?.card ?? '#13233a' }]}>
         <Text style={styles.cardLabel}>Connected: {connectedCount}/{accounts.length}</Text>
-        {accounts.map((item) => (
-          <View key={item.id} style={styles.rowBetween}>
-            <Text style={styles.rowLabel}>{item.label}</Text>
-            <Switch value={item.connected} onValueChange={() => onToggleAccount(item.id)} />
-          </View>
-        ))}
+
+        {accounts.map((item) => {
+          const iconName = ICON_BY_ACCOUNT[item.id] ?? 'link';
+
+          return (
+            <View key={item.id} style={styles.connectionBubble}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`${item.label} icon`}
+                onPress={() => onToggleAccount(item.id)}
+                style={({ pressed }) => [
+                  styles.iconButton,
+                  item.connected && styles.iconButtonConnected,
+                  pressed && styles.iconButtonPressed,
+                ]}
+              >
+                <Ionicons
+                  color={item.connected ? '#f2f7ff' : '#9eb1ce'}
+                  name={iconName}
+                  size={22}
+                />
+              </Pressable>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`${item.label} bubble`}
+                onPress={() => {}}
+                style={({ pressed }) => [styles.bubbleBody, pressed && styles.bubbleBodyPressed]}
+              >
+                <Text style={styles.rowLabel}>{item.label}</Text>
+                <Text style={styles.rowHint}>{item.connected ? 'Connected' : 'Not connected'}</Text>
+              </Pressable>
+            </View>
+          );
+        })}
       </View>
     </View>
   );
@@ -51,16 +87,51 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 10,
   },
-  rowBetween: {
+  connectionBubble: {
     flexDirection: 'row',
+    alignItems: 'stretch',
+    marginBottom: 10,
+  },
+  iconButton: {
+    width: 52,
+    borderTopLeftRadius: 14,
+    borderBottomLeftRadius: 14,
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
+    justifyContent: 'center',
+    backgroundColor: '#0f1d30',
+    borderWidth: 1,
+    borderColor: '#223957',
+    borderRightWidth: 0,
+  },
+  iconButtonConnected: {
+    backgroundColor: '#2d76f9',
+    borderColor: '#2d76f9',
+  },
+  iconButtonPressed: {
+    opacity: 0.88,
+  },
+  bubbleBody: {
+    flex: 1,
+    borderTopRightRadius: 14,
+    borderBottomRightRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#102039',
+    borderWidth: 1,
+    borderColor: '#223957',
+    justifyContent: 'center',
+  },
+  bubbleBodyPressed: {
+    opacity: 0.9,
   },
   rowLabel: {
     color: '#d8e4f8',
     fontSize: 15,
-    flex: 1,
-    marginRight: 8,
+    fontWeight: '600',
+  },
+  rowHint: {
+    color: '#9eb1ce',
+    fontSize: 12,
+    marginTop: 2,
   },
 });
