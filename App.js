@@ -66,6 +66,7 @@ const THEME_PRESETS = [
   { id: 'ice', label: 'Ice', background: '#0f1d24', card: '#17303c', accent: '#66c6e8' },
   { id: 'orchard', label: 'Orchard', background: '#1b2110', card: '#2b3418', accent: '#9fce4e' },
   { id: 'rose', label: 'Rose', background: '#24131a', card: '#381d29', accent: '#f276a4' },
+  { id: 'black-gold', label: 'Black Gold', background: '#090909', card: '#141414', accent: '#d4af37' },
 ];
 
 export default function App() {
