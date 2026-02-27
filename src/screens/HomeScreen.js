@@ -1,4 +1,5 @@
 ﻿import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 export default function HomeScreen({ displayName, username, email, phone, stats, theme }) {
@@ -12,10 +13,10 @@ export default function HomeScreen({ displayName, username, email, phone, stats,
 
   return (
     <View>
-      <Text style={styles.screenTitle}>Home</Text>
-      <Text style={[styles.screenSubtitle, { color: descriptionColor }]}>
-        Quick-glance share activity and operational updates.
-      </Text>
+      <View style={styles.headerRow}>
+        <Ionicons name="home" size={20} color={descriptionColor} style={styles.headerIcon} />
+        <Text style={styles.screenTitle}>Home</Text>
+      </View>
 
       <View style={[styles.card, { backgroundColor: theme?.card ?? '#13233a' }]}>
         <Text style={styles.cardLabel}>Performance Snapshot</Text>
@@ -74,15 +75,19 @@ export default function HomeScreen({ displayName, username, email, phone, stats,
 }
 
 const styles = StyleSheet.create({
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  headerIcon: {
+    marginRight: 8,
+  },
   screenTitle: {
     color: '#f2f7ff',
     fontSize: 22,
     fontWeight: '700',
-    marginBottom: 4,
-  },
-  screenSubtitle: {
-    color: '#b0c0d9',
-    marginBottom: 12,
   },
   card: {
     backgroundColor: '#13233a',

@@ -200,10 +200,10 @@ export default function NotesScreen({ notes, onChangeNotes, theme }) {
   return (
     <>
     <Pressable style={styles.screenWrap} onPress={() => setDeleteArmedNoteId(null)}>
-      <Text style={styles.screenTitle}>Notes</Text>
-      <Text style={[styles.screenSubtitle, { color: descriptionColor }]}>
-        Tap a note to open it. Content shows by default unless hidden in note settings.
-      </Text>
+      <View style={styles.headerRow}>
+        <Ionicons name="document-text" size={20} color={descriptionColor} style={styles.headerIcon} />
+        <Text style={styles.screenTitle}>Notes</Text>
+      </View>
 
       <View style={styles.searchWrap}>
         <TextInput
@@ -308,6 +308,15 @@ export default function NotesScreen({ notes, onChangeNotes, theme }) {
 
 const styles = StyleSheet.create({
   screenWrap: {},
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  headerIcon: {
+    marginRight: 8,
+  },
   modalBackdrop: {
     flex: 1,
     backgroundColor: 'rgba(8, 15, 27, 0.72)',

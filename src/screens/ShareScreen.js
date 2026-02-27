@@ -1,4 +1,5 @@
 ﻿import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
 export default function ShareScreen({
@@ -17,10 +18,10 @@ export default function ShareScreen({
 
   return (
     <View>
-      <Text style={styles.screenTitle}>Share</Text>
-      <Text style={[styles.screenSubtitle, { color: descriptionColor }]}>
-        Choose how you want to share your contact card right now.
-      </Text>
+      <View style={styles.headerRow}>
+        <Ionicons name="share-social" size={20} color={descriptionColor} style={styles.headerIcon} />
+        <Text style={styles.screenTitle}>Share</Text>
+      </View>
 
       <View style={[styles.card, { backgroundColor: theme?.card ?? '#13233a' }]}>
         <Text style={styles.cardLabel}>Live Card Preview</Text>
@@ -57,15 +58,19 @@ export default function ShareScreen({
 }
 
 const styles = StyleSheet.create({
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  headerIcon: {
+    marginRight: 8,
+  },
   screenTitle: {
     color: '#f2f7ff',
     fontSize: 22,
     fontWeight: '700',
-    marginBottom: 4,
-  },
-  screenSubtitle: {
-    color: '#b0c0d9',
-    marginBottom: 12,
   },
   card: {
     backgroundColor: '#13233a',

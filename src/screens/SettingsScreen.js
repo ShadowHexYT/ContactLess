@@ -1,4 +1,5 @@
 ﻿import React, { useMemo, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { Alert, Image, Modal, Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 
 export default function SettingsScreen({
@@ -67,10 +68,10 @@ export default function SettingsScreen({
 
   return (
     <View>
-      <Text style={styles.screenTitle}>Settings</Text>
-      <Text style={[styles.screenSubtitle, { color: descriptionColor }]}>
-        Configure profile fields, theme, and share card appearance.
-      </Text>
+      <View style={styles.headerRow}>
+        <Ionicons name="settings" size={20} color={descriptionColor} style={styles.headerIcon} />
+        <Text style={styles.screenTitle}>Settings</Text>
+      </View>
 
       <View style={[styles.card, { backgroundColor: theme?.card ?? '#13233a' }]}>
         <Text style={styles.cardLabel}>Contact Information</Text>
@@ -250,15 +251,19 @@ export default function SettingsScreen({
 }
 
 const styles = StyleSheet.create({
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  headerIcon: {
+    marginRight: 8,
+  },
   screenTitle: {
     color: '#f2f7ff',
     fontSize: 22,
     fontWeight: '700',
-    marginBottom: 4,
-  },
-  screenSubtitle: {
-    color: '#b0c0d9',
-    marginBottom: 12,
   },
   card: {
     backgroundColor: '#13233a',
