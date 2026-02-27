@@ -15,7 +15,7 @@ export default function BottomNav({ activeScreen, onChange, theme }) {
       activeIcon: 'people',
     },
     { key: 'share', label: 'Share', icon: 'share-social-outline', activeIcon: 'share-social' },
-    { key: 'notes', label: 'Notes', icon: 'document-text-outline', activeIcon: 'document-text' },
+    { key: 'notes', label: 'Shared', icon: 'albums-outline', activeIcon: 'albums' },
     { key: 'settings', label: 'Settings', icon: 'settings-outline', activeIcon: 'settings' },
   ];
   const activeIndex = Math.max(0, tabs.findIndex((item) => item.key === activeScreen));

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 const ICON_BY_ACCOUNT = {
   google: 'logo-google',
@@ -25,20 +25,26 @@ const ICON_BY_ACCOUNT = {
 export default function ConnectionsScreen({
   accounts,
   connectedCount,
-  onToggleAccount,
+  onLinkAccount,
   onDeleteAccount,
   suggestions = [],
   onAddSuggestedAccount,
   theme,
 }) {
   const [deleteArmedAccountId, setDeleteArmedAccountId] = useState(null);
+  const [linkingAccountId, setLinkingAccountId] = useState(null);
+  const [credentialUser, setCredentialUser] = useState('');
+  const [credentialPassword, setCredentialPassword] = useState('');
   const descriptionColor = `${(theme?.accent ?? '#9eb1ce')}CC`;
+  const accentColor = theme?.accent ?? '#2d76f9';
+  const accentBorder = `${accentColor}99`;
   const remainingSuggestions = suggestions.filter(
     (suggestion) => !accounts.some((account) => account.id === suggestion.id)
   );
   const hasSuggestions = remainingSuggestions.length > 0;
   const nextSuggestion = remainingSuggestions[0];
   const isDeleteArmed = deleteArmedAccountId !== null;
+  const linkingAccount = accounts.find((item) => item.id === linkingAccountId) ?? null;
 
   const requestDeleteAccount = (account) => {
     Alert.alert(
@@ -55,8 +61,32 @@ export default function ConnectionsScreen({
     );
     setDeleteArmedAccountId(null);
   };
+  const openLinkModal = (account) => {
+    setLinkingAccountId(account.id);
+    setCredentialUser('');
+    setCredentialPassword('');
+  };
+  const closeLinkModal = () => {
+    setLinkingAccountId(null);
+    setCredentialUser('');
+    setCredentialPassword('');
+  };
+  const confirmLinkAccount = () => {
+    if (!linkingAccount) {
+      return;
+    }
+
+    if (!credentialUser.trim() || !credentialPassword.trim()) {
+      Alert.alert('Missing Credentials', 'Enter both username/email and password.');
+      return;
+    }
+
+    onLinkAccount?.(linkingAccount.id);
+    closeLinkModal();
+  };
 
   return (
+    <>
     <Pressable onPress={() => setDeleteArmedAccountId(null)}>
       <View style={styles.headerRow}>
         <Ionicons name="people" size={20} color={descriptionColor} style={styles.headerIcon} />
@@ -80,7 +110,7 @@ export default function ConnectionsScreen({
                     setDeleteArmedAccountId(null);
                     return;
                   }
-                  onToggleAccount(item.id);
+                  openLinkModal(item);
                 }}
                 style={({ pressed }) => [
                   styles.iconButton,
@@ -173,6 +203,49 @@ export default function ConnectionsScreen({
         </View>
       </View>
     </Pressable>
+    <Modal visible={Boolean(linkingAccount)} transparent animationType="fade">
+      <Pressable style={styles.modalBackdrop} onPress={closeLinkModal}>
+        <Pressable
+          style={[styles.modalCard, { backgroundColor: theme?.card ?? '#13233a', borderColor: accentBorder }]}
+          onPress={() => {}}
+        >
+          <Text style={styles.modalTitle}>Link {linkingAccount?.label ?? 'Account'}</Text>
+          <Text style={[styles.modalSubtitle, { color: descriptionColor }]}>
+            Enter credentials to link this connection.
+          </Text>
+
+          <TextInput
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder="Username or email"
+            placeholderTextColor="#7f93b3"
+            style={[styles.input, { borderColor: accentBorder }]}
+            value={credentialUser}
+            onChangeText={setCredentialUser}
+          />
+          <TextInput
+            autoCapitalize="none"
+            autoCorrect={false}
+            secureTextEntry
+            placeholder="Password"
+            placeholderTextColor="#7f93b3"
+            style={[styles.input, { borderColor: accentBorder }]}
+            value={credentialPassword}
+            onChangeText={setCredentialPassword}
+          />
+
+          <View style={styles.modalActions}>
+            <Pressable style={[styles.modalButton, { borderColor: accentBorder }]} onPress={closeLinkModal}>
+              <Text style={styles.modalCancelText}>Cancel</Text>
+            </Pressable>
+            <Pressable style={[styles.modalButton, { backgroundColor: accentColor, borderColor: accentColor }]} onPress={confirmLinkAccount}>
+              <Text style={styles.modalConfirmText}>Link</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Pressable>
+    </Modal>
+    </>
   );
 }
 
@@ -312,5 +385,62 @@ const styles = StyleSheet.create({
     color: '#d8e4f8',
     fontSize: 12,
     fontWeight: '600',
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(8, 12, 20, 0.62)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 18,
+  },
+  modalCard: {
+    width: '100%',
+    borderRadius: 14,
+    borderWidth: 1,
+    padding: 14,
+  },
+  modalTitle: {
+    color: '#f2f7ff',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  modalSubtitle: {
+    marginTop: 4,
+    marginBottom: 10,
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  input: {
+    height: 42,
+    borderWidth: 1,
+    borderRadius: 10,
+    color: '#f2f7ff',
+    paddingHorizontal: 10,
+    marginBottom: 8,
+    backgroundColor: '#0f1d30',
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 2,
+  },
+  modalButton: {
+    minWidth: 82,
+    height: 36,
+    borderRadius: 9,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 8,
+  },
+  modalCancelText: {
+    color: '#d8e4f8',
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  modalConfirmText: {
+    color: '#f2f7ff',
+    fontWeight: '700',
+    fontSize: 13,
   },
 });

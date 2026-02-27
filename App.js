@@ -50,6 +50,104 @@ const RECENT_SHARES = [
   { id: 'r3', name: 'Mia Patel', method: 'Link', timeAgo: '1h ago' },
   { id: 'r4', name: 'Noah Brooks', method: 'NFC', timeAgo: '3h ago' },
 ];
+const SHARED_ACTIVITY = [
+  {
+    id: 's1',
+    name: 'Avery Chen',
+    direction: 'received',
+    method: 'NFC',
+    timeAgo: '5m ago',
+    username: '@averychen',
+    email: 'avery.chen@example.com',
+    phone: '+1 415 555 0182',
+    bio: 'Product designer and weekend climber.',
+    photoUri: '',
+    links: [
+      { app: 'LinkedIn', handle: 'avery-chen', profile: 'linkedin.com/in/avery-chen' },
+      { app: 'Instagram', handle: '@avery.chen', profile: 'instagram.com/avery.chen' },
+    ],
+  },
+  {
+    id: 's2',
+    name: 'Jordan Kim',
+    direction: 'sent',
+    method: 'QR',
+    timeAgo: '22m ago',
+    username: '@jordankim',
+    email: 'jordan.kim@example.com',
+    phone: '+1 646 555 0133',
+    bio: 'Growth lead. Coffee chat friendly.',
+    photoUri: '',
+    links: [
+      { app: 'X', handle: '@jordankim', profile: 'x.com/jordankim' },
+      { app: 'GitHub', handle: 'jordankim', profile: 'github.com/jordankim' },
+    ],
+  },
+  {
+    id: 's3',
+    name: 'Mia Patel',
+    direction: 'received',
+    method: 'Link',
+    timeAgo: '1h ago',
+    username: '@miapatel',
+    email: 'mia.patel@example.com',
+    phone: '+1 312 555 0199',
+    bio: 'Marketing strategist and podcast host.',
+    photoUri: '',
+    links: [
+      { app: 'Spotify', handle: '@miapatel', profile: 'open.spotify.com/user/miapatel' },
+      { app: 'Pinterest', handle: '@miapatel', profile: 'pinterest.com/miapatel' },
+    ],
+  },
+  {
+    id: 's4',
+    name: 'Noah Brooks',
+    direction: 'sent',
+    method: 'NFC',
+    timeAgo: '3h ago',
+    username: '@noahbrooks',
+    email: 'noah.brooks@example.com',
+    phone: '+1 917 555 0121',
+    bio: 'Engineer building mobile automation tools.',
+    photoUri: '',
+    links: [
+      { app: 'GitHub', handle: 'noahbrooks', profile: 'github.com/noahbrooks' },
+      { app: 'YouTube', handle: '@noahbrooks', profile: 'youtube.com/@noahbrooks' },
+    ],
+  },
+  {
+    id: 's5',
+    name: 'Elena Rivera',
+    direction: 'received',
+    method: 'QR',
+    timeAgo: 'Yesterday',
+    username: '@elena.rivera',
+    email: 'elena.rivera@example.com',
+    phone: '+1 206 555 0117',
+    bio: 'Creative director focused on brand systems.',
+    photoUri: '',
+    links: [
+      { app: 'Instagram', handle: '@elena.rivera', profile: 'instagram.com/elena.rivera' },
+      { app: 'Apple Music', handle: '@elena.rivera', profile: 'music.apple.com/profile/elena.rivera' },
+    ],
+  },
+  {
+    id: 's6',
+    name: 'Marcus Reed',
+    direction: 'received',
+    method: 'Link',
+    timeAgo: '2d ago',
+    username: '@marcusreed',
+    email: 'marcus.reed@example.com',
+    phone: '+1 512 555 0176',
+    bio: 'Startup advisor and former founder.',
+    photoUri: '',
+    links: [
+      { app: 'LinkedIn', handle: 'marcus-reed', profile: 'linkedin.com/in/marcus-reed' },
+      { app: 'Snapchat', handle: '@marcusreed', profile: 'snapchat.com/add/marcusreed' },
+    ],
+  },
+];
 
 const HOTFIX_LIST = [
   { id: 'h1', title: 'iOS handoff retry fix', status: 'Shipped' },
@@ -144,10 +242,10 @@ export default function App() {
     [connectedCount]
   );
 
-  const toggleAccount = (id) => {
+  const linkAccount = (id) => {
     setAccounts((current) =>
       current.map((item) =>
-        item.id === id ? { ...item, connected: !item.connected } : item
+        item.id === id ? { ...item, connected: true } : item
       )
     );
   };
@@ -535,7 +633,7 @@ export default function App() {
         <ConnectionsScreen
           accounts={accounts}
           connectedCount={connectedCount}
-          onToggleAccount={toggleAccount}
+          onLinkAccount={linkAccount}
           onDeleteAccount={removeAccount}
           suggestions={CONNECTION_SUGGESTIONS}
           onAddSuggestedAccount={addSuggestedAccount}
@@ -545,7 +643,7 @@ export default function App() {
     }
 
     if (activeScreen === 'notes') {
-      return <NotesScreen notes={notes} onChangeNotes={setNotes} theme={activeTheme} />;
+      return <NotesScreen sharedCards={SHARED_ACTIVITY} theme={activeTheme} />;
     }
 
     if (activeScreen === 'share') {

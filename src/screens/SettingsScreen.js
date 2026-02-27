@@ -74,7 +74,7 @@ export default function SettingsScreen({
   const confirmDeleteUserData = () => {
     Alert.alert(
       'Delete All User Data',
-      'This will erase profile settings, notes, and saved preferences on this device.',
+      'This will erase profile settings, shared card history, and saved preferences on this device.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
