@@ -1,13 +1,19 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { Animated, Easing, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function BottomNav({ activeScreen, onChange }) {
   const tabs = [
-    { key: 'home', label: 'Home' },
-    { key: 'connections', label: 'Connections' },
-    { key: 'share', label: 'Share' },
-    { key: 'notes', label: 'Notes' },
-    { key: 'settings', label: 'Settings' },
+    { key: 'home', label: 'Home', icon: 'home-outline', activeIcon: 'home' },
+    {
+      key: 'connections',
+      label: 'Connections',
+      icon: 'people-outline',
+      activeIcon: 'people',
+    },
+    { key: 'share', label: 'Share', icon: 'share-social-outline', activeIcon: 'share-social' },
+    { key: 'notes', label: 'Notes', icon: 'document-text-outline', activeIcon: 'document-text' },
+    { key: 'settings', label: 'Settings', icon: 'settings-outline', activeIcon: 'settings' },
   ];
   const activeIndex = Math.max(0, tabs.findIndex((item) => item.key === activeScreen));
   const indicatorLeft = useRef(new Animated.Value(activeIndex)).current;
@@ -26,12 +32,18 @@ export default function BottomNav({ activeScreen, onChange }) {
     }).start();
   }, [activeIndex, indicatorLeft]);
 
-  const navButton = (key, label) => (
+  const navButton = ({ key, label, icon, activeIcon }) => (
     <TouchableOpacity
       key={key}
       style={styles.navButton}
       onPress={() => onChange(key)}
     >
+      <Ionicons
+        name={activeScreen === key ? activeIcon : icon}
+        size={16}
+        color={activeScreen === key ? '#ffffff' : '#c4d3eb'}
+        style={styles.navButtonIcon}
+      />
       <Text
         style={[
           styles.navButtonText,
@@ -52,7 +64,7 @@ export default function BottomNav({ activeScreen, onChange }) {
   return (
     <View style={styles.navBar} onLayout={(event) => setBarWidth(event.nativeEvent.layout.width)}>
       <Animated.View style={[styles.activePill, indicatorStyle]} />
-      {tabs.map((tab) => navButton(tab.key, tab.label))}
+      {tabs.map((tab) => navButton(tab))}
     </View>
   );
 }
@@ -70,9 +82,12 @@ const styles = StyleSheet.create({
   navButton: {
     flex: 1,
     borderRadius: 8,
-    paddingVertical: 10,
+    paddingVertical: 8,
     alignItems: 'center',
     zIndex: 1,
+  },
+  navButtonIcon: {
+    marginBottom: 2,
   },
   activePill: {
     position: 'absolute',
