@@ -1,8 +1,11 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
+  AppState,
   Easing,
+  Platform,
   ScrollView,
+  Settings,
   StatusBar,
   StyleSheet,
   Text,
@@ -34,6 +37,7 @@ const HOTFIX_LIST = [
   { id: 'h2', title: 'Contact card truncation patch', status: 'Shipped' },
   { id: 'h3', title: 'QR scan latency reduction', status: 'In QA' },
 ];
+const NOTES_STORAGE_KEY = 'contactless.notes';
 
 export default function App() {
   const [activeScreen, setActiveScreen] = useState('home');
@@ -41,9 +45,12 @@ export default function App() {
   const [email, setEmail] = useState('you@example.com');
   const [phone, setPhone] = useState('+1 000 000 0000');
   const [notes, setNotes] = useState([]);
+  const [isNotesHydrated, setIsNotesHydrated] = useState(false);
   const [isNfcEnabled, setIsNfcEnabled] = useState(false);
   const [accounts, setAccounts] = useState(DEFAULT_ACCOUNTS);
   const screenAnim = useRef(new Animated.Value(1)).current;
+  const latestNotesRef = useRef(notes);
+  const canPersistNotes = Platform.OS === 'ios';
 
   const connectedCount = useMemo(
     () => accounts.filter((item) => item.connected).length,
@@ -82,6 +89,63 @@ export default function App() {
       useNativeDriver: true,
     }).start();
   }, [activeScreen, screenAnim]);
+
+  useEffect(() => {
+    latestNotesRef.current = notes;
+  }, [notes]);
+
+  const persistNotes = (nextNotes) => {
+    if (!canPersistNotes) {
+      return;
+    }
+
+    try {
+      Settings.set({ [NOTES_STORAGE_KEY]: JSON.stringify(nextNotes) });
+    } catch (error) {
+      console.warn('Unable to save notes:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (!canPersistNotes) {
+      setIsNotesHydrated(true);
+      return;
+    }
+
+    try {
+      const saved = Settings.get(NOTES_STORAGE_KEY);
+      if (typeof saved === 'string') {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          setNotes(parsed);
+        }
+      }
+    } catch (error) {
+      console.warn('Unable to load saved notes:', error);
+    } finally {
+      setIsNotesHydrated(true);
+    }
+  }, [canPersistNotes]);
+
+  useEffect(() => {
+    if (!isNotesHydrated) {
+      return;
+    }
+
+    persistNotes(notes);
+  }, [isNotesHydrated, notes]);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'inactive' || nextState === 'background') {
+        persistNotes(latestNotesRef.current);
+      }
+    });
+
+    return () => {
+      sub.remove();
+    };
+  }, []);
 
   const renderScreen = () => {
     if (activeScreen === 'home') {

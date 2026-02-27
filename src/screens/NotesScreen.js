@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Modal, Pressable, Share, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export default function NotesScreen({ notes, onChangeNotes }) {
   const [query, setQuery] = useState('');
@@ -79,6 +79,31 @@ export default function NotesScreen({ notes, onChangeNotes }) {
     handleRemoveNote(pendingDeleteNoteId);
     setPendingDeleteNoteId(null);
     setDeleteArmedNoteId(null);
+  };
+
+  const handleExportNotes = async () => {
+    if (notes.length === 0) {
+      Alert.alert('No Notes', 'Add at least one note before exporting.');
+      return;
+    }
+
+    const exportedAt = new Date().toISOString();
+    const payload = {
+      exportedAt,
+      noteCount: notes.length,
+      notes,
+    };
+    const message = JSON.stringify(payload, null, 2);
+
+    try {
+      await Share.share({
+        title: 'ContactLess Notes Backup',
+        message,
+        subject: 'ContactLess Notes Backup',
+      });
+    } catch (error) {
+      Alert.alert('Export Failed', 'Unable to export notes right now.');
+    }
   };
 
   const confirmDeleteModal = (
@@ -186,19 +211,33 @@ export default function NotesScreen({ notes, onChangeNotes }) {
 
       <View style={styles.actionsRow}>
         <Text style={styles.cardLabel}>Personal Notes ({notes.length})</Text>
-        <Pressable
-          style={styles.addButton}
-          onPress={(event) => {
-            event.stopPropagation();
-            if (deleteArmedNoteId !== null) {
-              setDeleteArmedNoteId(null);
-              return;
-            }
-            handleAddNote();
-          }}
-        >
-          <Text style={styles.addButtonText}>+ Add Note</Text>
-        </Pressable>
+        <View style={styles.actionButtons}>
+          <Pressable
+            style={styles.exportButton}
+            onPress={(event) => {
+              event.stopPropagation();
+              if (deleteArmedNoteId !== null) {
+                setDeleteArmedNoteId(null);
+              }
+              handleExportNotes();
+            }}
+          >
+            <Text style={styles.exportButtonText}>Export</Text>
+          </Pressable>
+          <Pressable
+            style={styles.addButton}
+            onPress={(event) => {
+              event.stopPropagation();
+              if (deleteArmedNoteId !== null) {
+                setDeleteArmedNoteId(null);
+                return;
+              }
+              handleAddNote();
+            }}
+          >
+            <Text style={styles.addButtonText}>+ Add Note</Text>
+          </Pressable>
+        </View>
       </View>
 
       <View style={styles.grid}>
@@ -364,6 +403,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 12,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  exportButton: {
+    borderWidth: 1,
+    borderColor: '#355072',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginRight: 8,
+  },
+  exportButtonText: {
+    color: '#c8d8ef',
+    fontWeight: '700',
+    fontSize: 13,
   },
   addButton: {
     backgroundColor: '#1f4f86',
