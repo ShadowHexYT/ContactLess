@@ -27,6 +27,22 @@ const DEFAULT_ACCOUNTS = [
   { id: 'icloud', label: 'Apple iCloud', connected: false },
   { id: 'outlook', label: 'Microsoft Outlook', connected: false },
 ];
+const CONNECTION_SUGGESTIONS = [
+  { id: 'spotify', label: 'Spotify' },
+  { id: 'snapchat', label: 'Snapchat' },
+  { id: 'apple-music', label: 'Apple Music' },
+  { id: 'pinterest', label: 'Pinterest' },
+  { id: 'instagram', label: 'Instagram' },
+  { id: 'tiktok', label: 'TikTok' },
+  { id: 'linkedin', label: 'LinkedIn' },
+  { id: 'x', label: 'X' },
+  { id: 'youtube', label: 'YouTube' },
+  { id: 'discord', label: 'Discord' },
+  { id: 'whatsapp', label: 'WhatsApp' },
+  { id: 'telegram', label: 'Telegram' },
+  { id: 'facebook', label: 'Facebook' },
+  { id: 'github', label: 'GitHub' },
+];
 
 const RECENT_SHARES = [
   { id: 'r1', name: 'Avery Chen', method: 'NFC', timeAgo: '5m ago' },
@@ -134,6 +150,26 @@ export default function App() {
         item.id === id ? { ...item, connected: !item.connected } : item
       )
     );
+  };
+  const addSuggestedAccount = (suggestedAccount) => {
+    if (!suggestedAccount?.id || !suggestedAccount?.label) {
+      return;
+    }
+
+    setAccounts((current) => {
+      const alreadyExists = current.some((item) => item.id === suggestedAccount.id);
+      if (alreadyExists) {
+        return current;
+      }
+
+      return [
+        ...current,
+        { id: suggestedAccount.id, label: suggestedAccount.label, connected: false },
+      ];
+    });
+  };
+  const removeAccount = (id) => {
+    setAccounts((current) => current.filter((item) => item.id !== id));
   };
 
   const exportUserData = async () => {
@@ -500,6 +536,9 @@ export default function App() {
           accounts={accounts}
           connectedCount={connectedCount}
           onToggleAccount={toggleAccount}
+          onDeleteAccount={removeAccount}
+          suggestions={CONNECTION_SUGGESTIONS}
+          onAddSuggestedAccount={addSuggestedAccount}
           theme={activeTheme}
         />
       );
